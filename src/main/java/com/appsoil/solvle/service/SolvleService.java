@@ -25,6 +25,7 @@ public class SolvleService {
                 .filter(w -> isValidWord(w, wordleInfo))
                 .map(Word::getWord)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
+        System.out.println("Found " + containedWords.size() + " viable matches.");
         return containedWords;
     }
 

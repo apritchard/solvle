@@ -17,20 +17,20 @@ public class WordleInfo extends Word {
     private Map<Integer, Set<Character>> positionExclusions = new HashMap<>();
 
     //parses a string of letters. Letters may be followed by either a number, a question mark, or both
-    // for example abc3d?e?45fg? will be parsed into (a)(b)(c3)(d?)(e?45)(f)(g?)
-    Pattern wordleRegex = Pattern.compile("(\\S)(\\d)*(\\?\\d*)*");
+    // for example abc3d!e!45fg! will be parsed into (a)(b)(c3)(d!)(e!45)(f)(g!)
+    Pattern wordleRegex = Pattern.compile("(\\S)(\\d)*(\\!\\d*)*");
 
     /**
      * Creates a description of known wordle knowledge based on provided input string.
      * @param word String containing all available letters from which to guess. If a letter is followed by
      *             numbers, those numbers indicate required positions for the letter. If a letter is followed
-     *             by a question mark (?), that letter is required, but we don't know where. If the ? is followed
+     *             by an exclamation (!), that letter is required, but we don't know where. If the ! is followed
      *             by numbers, those indicate positions we know are not available.
      *
-     *             For example: ac1t?2u - this string tells us:
+     *             For example: ac1t*2u - this string tells us:
      *                  a   - available
      *                  c1  - required in position 1
-     *                  t?12- required, but NOT in positions 1 or 2
+     *                  t!12- required, but NOT in positions 1 or 2
      *                  u   - available
      */
     public WordleInfo(String word) {
@@ -52,7 +52,7 @@ public class WordleInfo extends Word {
                     letterPositions.put(pos, c);
                 });
             }
-            //if we have position numbers after the '?', add those to the position exclusions map
+            //if we have position numbers after the '!', add those to the position exclusions map
             if(required) {
                 matcher.group(3).chars().mapToObj(i -> Character.getNumericValue(i)).skip(1).forEach(pos -> {
                     if(!positionExclusions.containsKey(pos)) {

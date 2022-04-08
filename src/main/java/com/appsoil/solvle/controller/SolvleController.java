@@ -19,6 +19,6 @@ public class SolvleController {
 
     @GetMapping("/{wordleString}")
     public Set<String> getValidWords(@PathVariable String wordleString) {
-        return solvleService.getValidWords(wordleString, 5); //default to 5 length for now
+        return solvleService.getValidWords(wordleString.toLowerCase(), 5); //default to 5 length for now
     }
 }
