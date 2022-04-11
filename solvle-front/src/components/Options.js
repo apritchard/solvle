@@ -9,7 +9,6 @@ function Options(props) {
         availableLetters,
         knownLetters,
         unsureLetters,
-        currAttempt,
         onSelectWord
     } =
         useContext(AppContext);

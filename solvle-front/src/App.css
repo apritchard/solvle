@@ -144,9 +144,9 @@ nav h1 {
   cursor: pointer;
 }
 
-#big {
+.big {
   width: 100px;
 }
-#disabled {
+.disabled {
   background-color: #3a393c;
 }
