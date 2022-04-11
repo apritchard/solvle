@@ -22,6 +22,7 @@ public class SolvleService {
 
     public Set<String> getValidWords(String wordleString, int length) {
         WordleInfo wordleInfo = new WordleInfo(wordleString);
+        log.info("Searching for words of length {}", length);
         SortedSet<String> containedWords = dictionary.getWords().stream()
                 .filter(w -> w.getLength() == length)
                 .filter(w -> isValidWord(w, wordleInfo))

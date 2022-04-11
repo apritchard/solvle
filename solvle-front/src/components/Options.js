@@ -26,7 +26,7 @@ function Options(props) {
         });
 
         console.log("Fetching " + wordleString);
-        fetch('/solvle/' + wordleString)
+        fetch('/solvle/5/' + wordleString)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);
