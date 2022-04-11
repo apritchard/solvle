@@ -54,11 +54,20 @@ nav h1 {
   overflow-y:auto;
 }
 
+.optionItem {
+  cursor: pointer;
+}
+
 .row {
   flex: 33%;
   display: flex;
   flex-direction: row;
   margin: 5px;
+  border-top: 2px solid #121212;
+}
+
+#highlight {
+  border-top: 2px solid #b49f39;
 }
 
 .letter {
@@ -73,6 +82,7 @@ nav h1 {
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   user-select: none;
+  cursor: pointer;
 }
 
 #correct {

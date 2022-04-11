@@ -29,6 +29,16 @@ function App() {
     });
     const [currentOptions, setCurrentOptions] = useState(new Set());
 
+    const [board, setBoard] = useState([
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+    ]);
+    const [currAttempt, setCurrAttempt] = useState({attempt: 0, letter: 0});
+
     const addKnownLetter = (pos, letter) => {
         setKnownLetters(prev => new Map(prev.set(pos, letter)));
     }
@@ -59,16 +69,6 @@ function App() {
         });
     }
 
-    const [board, setBoard] = useState([
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-    ]);
-    const [currAttempt, setCurrAttempt] = useState({attempt: 0, letter: 0});
-
     const onEnter = () => {
         if (currAttempt.letter !== 5) return;
 
@@ -98,6 +98,22 @@ function App() {
         });
     };
 
+    const onSelectWord = (word) => {
+        console.log("Setting " + word + word.length + " " + currAttempt.attempt + currAttempt.letter);
+        if(currAttempt.letter !== 0) {
+            return;
+        }
+        const newBoard = [...board];
+        for(let i = 0; i < word.length; i++) {
+            newBoard[currAttempt.attempt][i] = word[i];
+        }
+        setBoard(newBoard);
+        setCurrAttempt( {
+            attempt: currAttempt.attempt,
+            letter: word.length
+        });
+    }
+
     return (
         <div className="App">
             <nav>
@@ -123,10 +139,11 @@ function App() {
                     removeAvailableLetter,
                     currentOptions,
                     setCurrentOptions,
+                    onSelectWord
                 }}
             >
                 <div className="game">
-                    <div class="parent">
+                    <div className="parent">
                         <Board/>
                         <Options/>
                     </div>

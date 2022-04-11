@@ -1,9 +1,17 @@
-import React, {useCallback, useContext, useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {AppContext} from "../App";
 
 function Options(props) {
 
-    const {currentOptions, setCurrentOptions, availableLetters, knownLetters, unsureLetters} =
+    const {
+        currentOptions,
+        setCurrentOptions,
+        availableLetters,
+        knownLetters,
+        unsureLetters,
+        currAttempt,
+        onSelectWord
+    } =
         useContext(AppContext);
 
     useEffect(() => {
@@ -37,10 +45,10 @@ function Options(props) {
     return (
 
         <div>
-            <div class="options">
+            <div className="options">
                 <ol>
                     {[...currentOptions].map((item, index) => (
-                        <li>{item}</li>
+                        <li className="optionItem" key={item} value={item} onClick={() => onSelectWord(item.toUpperCase())}>{item}</li>
                     ))}
                 </ol>
             </div>
