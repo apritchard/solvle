@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
-import { AppContext } from "../App";
+import React, {useContext} from "react";
+import {AppContext} from "../App";
 
-function Key({ keyVal, bigKey, disabled }) {
-    const { onSelectLetter, onDelete, onEnter } =
+function Key({keyVal, bigKey, disabled}) {
+    const {onSelectLetter, onDelete, onEnter} =
         useContext(AppContext);
 
     const selectLetter = () => {

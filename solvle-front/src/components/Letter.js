@@ -1,19 +1,21 @@
-import React, { useContext, useEffect } from "react";
-import { AppContext } from "../App";
+import React, {useContext} from "react";
+import {AppContext} from "../App";
 
-function Letter({ letterPos, attemptVal }) {
-    const { board,
+function Letter({letterPos, attemptVal}) {
+    const {
+        board,
         availableLetters, addAvailableLetter, removeAvailableLetter,
         unsureLetters, addUnsureLetter, removeUnsureLetter,
-        knownLetters, addKnownLetter, removeKnownLetter, currAttempt } =
-        useContext(AppContext);
+        knownLetters, addKnownLetter, removeKnownLetter, currAttempt
+    } = useContext(AppContext);
+
     const letter = board[attemptVal][letterPos];
     const available = availableLetters.has(letter);
     const unsure = unsureLetters.get(letterPos).has(letter);
     const known = letter !== "" && knownLetters.get(letterPos) === letter;
 
     let letterState = "error";
-    if(known) {
+    if (known) {
         letterState = "correct";
     } else if (unsure) {
         letterState = "almost";
@@ -23,19 +25,25 @@ function Letter({ letterPos, attemptVal }) {
         letterState = "";
     }
 
-    if(!available && (known || unsure)) {
+    if (!available && (known || unsure)) {
         letterState = "huh";
     }
 
     const toggleState = () => {
         console.log("attemptVal " + attemptVal + " currAttempt " + currAttempt.attempt);
-        if(attemptVal > currAttempt.attempt || letter === "") {
+        if (attemptVal > currAttempt.attempt || letter === "") {
             return;
         }
-        console.log( "old state for " + letter + ": " + letterState);
-        switch(letterState) {
+        console.log("old state for " + letter + ": " + letterState);
+        switch (letterState) {
             case "":
+                console.log("adding error " + letter);
+                removeKnownLetter(letterPos);
+                removeAvailableLetter(letter);
+                break;
+            case "error":
                 console.log("adding unsure " + letter);
+                addAvailableLetter(letter);
                 addUnsureLetter(letterPos, letter);
                 break;
             case "almost":
@@ -44,13 +52,8 @@ function Letter({ letterPos, attemptVal }) {
                 addKnownLetter(letterPos, letter);
                 break;
             case "correct":
-                console.log("adding error " + letter);
+                console.log("returning letter to default " + letter);
                 removeKnownLetter(letterPos);
-                removeAvailableLetter(letter);
-                break;
-            case "error":
-                console.log("adding available " + letter);
-                addAvailableLetter(letter);
                 break;
             case "huh":
                 console.log("clearing letter " + letter);
