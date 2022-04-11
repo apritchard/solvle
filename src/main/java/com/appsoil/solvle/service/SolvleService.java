@@ -3,6 +3,7 @@ package com.appsoil.solvle.service;
 import com.appsoil.solvle.wordler.Dictionary;
 import com.appsoil.solvle.wordler.Word;
 import com.appsoil.solvle.wordler.WordleInfo;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class SolvleService {
 
     @Autowired
@@ -25,7 +27,7 @@ public class SolvleService {
                 .filter(w -> isValidWord(w, wordleInfo))
                 .map(Word::getWord)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
-        System.out.println("Found " + containedWords.size() + " viable matches.");
+        log.info("Found " + containedWords.size() + " viable matches.");
         return containedWords;
     }
 

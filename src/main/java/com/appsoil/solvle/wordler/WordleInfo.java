@@ -1,6 +1,7 @@
 package com.appsoil.solvle.wordler;
 
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
 
 
 @Data
+@Log4j2
 public class WordleInfo extends Word {
     private Set<Character> requiredLetters = new HashSet<>();
     private Map<Integer, Character> letterPositions = new HashMap<>();
@@ -36,7 +38,7 @@ public class WordleInfo extends Word {
     public WordleInfo(String word) {
         super(word.replaceAll("[^A-Za-z]", "")); //create a base Word with only alpha
 
-        System.out.println("Parsing wordle characters " + word);
+        log.info("Parsing wordle characters " + word);
 
         Matcher matcher = wordleRegex.matcher(word);
         while(matcher.find()) {
