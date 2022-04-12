@@ -2,9 +2,11 @@ package com.appsoil.solvle.service;
 
 import com.appsoil.solvle.wordler.Dictionary;
 import com.appsoil.solvle.wordler.Word;
+import com.appsoil.solvle.wordler.WordleData;
 import com.appsoil.solvle.wordler.WordleInfo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,16 +22,27 @@ public class SolvleService {
     @Autowired
     Dictionary dictionary;
 
-    public Set<String> getValidWords(String wordleString, int length) {
+    @Cacheable
+    public WordleData getValidWords(String wordleString, int length) {
         WordleInfo wordleInfo = new WordleInfo(wordleString);
         log.info("Searching for words of length {}", length);
-        SortedSet<String> containedWords = dictionary.getWords().stream()
+//        SortedSet<String> containedWords = dictionary.getWords().stream()
+//                .filter(w -> w.getLength() == length)
+//                .filter(w -> isValidWord(w, wordleInfo))
+//                .map(Word::getWord)
+//                .collect(Collectors.toCollection(() -> new TreeSet<>()));
+        SortedSet<Word> containedWords = dictionary.getWords().stream()
                 .filter(w -> w.getLength() == length)
                 .filter(w -> isValidWord(w, wordleInfo))
-                .map(Word::getWord)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
-        log.info("Found " + containedWords.size() + " viable matches.");
-        return containedWords;
+
+        WordleData wordleData = new WordleData(containedWords);
+
+        log.info("Found " + wordleData.getTotalWords() + " viable matches.");
+        return wordleData;
+
+//        log.info("Found " + containedWords.size() + " viable matches.");
+//        return containedWords;
     }
 
     /**

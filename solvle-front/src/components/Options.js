@@ -32,12 +32,17 @@ function Options(props) {
             }
         });
 
+        if(availableLetters.size === 26 && wordleString.length === 26) {
+            console.log("All words available, skipping request");
+            return;
+        }
+
         console.log("Fetching " + wordleString);
         fetch('/solvle/5/' + wordleString)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);
-                setCurrentOptions(data);
+                setCurrentOptions(data.words);
             });
     }, [availableLetters, knownLetters, unsureLetters]);
 
@@ -46,8 +51,8 @@ function Options(props) {
         <div>
             <div className="options">
                 <ol>
-                    {[...currentOptions].map((item, index) => (
-                        <li className="optionItem" key={item} value={item} onClick={() => onSelectWord(item.toUpperCase())}>{item}</li>
+                    {[...currentOptions].slice(0,100).map((item, index) => (
+                        <li className="optionItem" key={item.word.word} value={index +1} onClick={() => onSelectWord(item.word.word.toUpperCase())}>{item.word.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
                     ))}
                 </ol>
             </div>
