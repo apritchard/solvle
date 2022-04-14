@@ -5,6 +5,8 @@ import {AppContext} from "../App";
 function Controls() {
     const {
         boardState,
+        restrictWords,
+        setRestrictWords,
         resetBoard
     } = useContext(AppContext);
 
@@ -36,6 +38,10 @@ function Controls() {
         resetBoard(boardState.settings.attempts, boardState.settings.wordLength);
     }
 
+    const toggleResetWords = () => {
+        setRestrictWords(!restrictWords);
+    }
+
     return (
         <div className="controls">
             <Button variant="primary" onClick={increaseWordLength}>Add Letter</Button>
@@ -43,6 +49,10 @@ function Controls() {
             <Button variant="primary" onClick={increaseAttempts}>Add Row</Button>
             <Button variant="secondary" onClick={decreaseAttempts}>Remove Row</Button>
             <Button variant="danger" onClick={clickReset}>Reset Board</Button>
+            <label title="Limits 5-character words to known Wordle wordlist">
+                <input type="checkbox" checked={restrictWords} onChange={toggleResetWords}  />
+                Restrict wordlist
+            </label>
         </div>
     );
 }

@@ -65,6 +65,7 @@ function App() {
     const [knownLetters, setKnownLetters] = useState(initialKnownLetters(boardState.settings.wordLength));
     const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
     const [currentOptions, setCurrentOptions] = useState(new Set());
+    const [restrictWords, setRestrictWords] = useState(true);
 
     const resetBoard = (rows, width) => {
         setBoardState(initialBoardState(rows, width));
@@ -180,20 +181,22 @@ function App() {
                 value={{
                     boardState,
                     setBoardState,
-                    onSelectLetter,
-                    onDelete,
-                    onEnter,
+                    currentOptions,
+                    setCurrentOptions,
                     availableLetters,
                     knownLetters,
                     unsureLetters,
+                    restrictWords,
+                    setRestrictWords,
+                    onSelectLetter,
+                    onDelete,
+                    onEnter,
                     addKnownLetter,
                     removeKnownLetter,
                     addUnsureLetter,
                     removeUnsureLetter,
                     addAvailableLetter,
                     removeAvailableLetter,
-                    currentOptions,
-                    setCurrentOptions,
                     onSelectWord,
                     resetBoard
                 }}

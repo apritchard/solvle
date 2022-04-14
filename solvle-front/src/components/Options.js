@@ -10,7 +10,8 @@ function Options(props) {
         knownLetters,
         unsureLetters,
         onSelectWord,
-        boardState
+        boardState,
+        restrictWords
     } =
         useContext(AppContext);
 
@@ -39,13 +40,13 @@ function Options(props) {
         }
 
         console.log("Fetching " + wordleString);
-        fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=true")
+        fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=" + restrictWords)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);
                 setCurrentOptions(data.words);
             });
-    }, [setCurrentOptions, boardState.settings.wordLength, availableLetters, knownLetters, unsureLetters]);
+    }, [setCurrentOptions, boardState.settings.wordLength, availableLetters, knownLetters, unsureLetters, restrictWords]);
 
     return (
 
