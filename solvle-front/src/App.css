@@ -32,7 +32,7 @@ nav h1 {
   height: calc(100vh - 170px);
   display: flex;
   align-items: center;
-  padding-top: 50px;
+  padding-top: 10px;
   flex-direction: column;
 }
 
@@ -46,6 +46,22 @@ nav h1 {
 
 .parent {
   display: flex;
+}
+
+.btn-primary {
+  background-color: #528d4e;
+}
+.btn-secondary{
+  background-color: #b49f39;
+}
+.btn-danger{
+  color: lightgray;
+  background-color: #3a393c;
+}
+
+.controls {
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
 
 .options {

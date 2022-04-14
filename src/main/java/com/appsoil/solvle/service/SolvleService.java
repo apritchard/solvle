@@ -6,6 +6,7 @@ import com.appsoil.solvle.wordler.WordleData;
 import com.appsoil.solvle.wordler.WordleInfo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,16 @@ import java.util.stream.Collectors;
 @Log4j2
 public class SolvleService {
 
+    @Qualifier("defaultDictionary")
     @Autowired
-    Dictionary dictionary;
+    Dictionary defaultDictionary;
+
+    @Qualifier("wordleDictionary")
+    @Autowired
+    Dictionary wordleDictionary;
 
     @Cacheable
-    public WordleData getValidWords(String wordleString, int length) {
+    public WordleData getValidWords(String wordleString, int length, boolean wordleDict) {
         WordleInfo wordleInfo = new WordleInfo(wordleString);
         log.info("Searching for words of length {}", length);
 //        SortedSet<String> containedWords = dictionary.getWords().stream()
@@ -31,6 +37,7 @@ public class SolvleService {
 //                .filter(w -> isValidWord(w, wordleInfo))
 //                .map(Word::getWord)
 //                .collect(Collectors.toCollection(() -> new TreeSet<>()));
+        Dictionary dictionary = length == 5  && wordleDict ? wordleDictionary : defaultDictionary;
         SortedSet<Word> containedWords = dictionary.getWords().stream()
                 .filter(w -> w.getLength() == length)
                 .filter(w -> isValidWord(w, wordleInfo))

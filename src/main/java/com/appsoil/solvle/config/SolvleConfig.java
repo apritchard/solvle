@@ -17,10 +17,19 @@ import java.util.Set;
 @Log4j2
 public class SolvleConfig {
 
-    @Bean
+    @Bean(name="defaultDictionary")
     Dictionary getDictionary() {
+        return readResourceToDictionary("/dict2/enable1.txt");
+    }
+
+    @Bean(name="wordleDictionary")
+    Dictionary getWordleDictionary() {
+        return readResourceToDictionary("/dict2/wordle-solutions.txt");
+    }
+
+    private Dictionary readResourceToDictionary(String path) {
         log.info("Current path: " + System.getProperty("user.dir"));
-        InputStream is = this.getClass().getResourceAsStream("/dict2/enable1.txt");
+        InputStream is = this.getClass().getResourceAsStream(path);
         Set<Word> words = new HashSet<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         int count = 0;

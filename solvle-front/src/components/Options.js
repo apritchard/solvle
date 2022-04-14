@@ -9,7 +9,8 @@ function Options(props) {
         availableLetters,
         knownLetters,
         unsureLetters,
-        onSelectWord
+        onSelectWord,
+        boardState
     } =
         useContext(AppContext);
 
@@ -38,13 +39,13 @@ function Options(props) {
         }
 
         console.log("Fetching " + wordleString);
-        fetch('/solvle/5/' + wordleString)
+        fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=true")
             .then(res => res.json())
             .then((data) => {
                 console.log(data);
                 setCurrentOptions(data.words);
             });
-    }, [availableLetters, knownLetters, unsureLetters]);
+    }, [setCurrentOptions, boardState.settings.wordLength, availableLetters, knownLetters, unsureLetters]);
 
     return (
 
@@ -52,7 +53,7 @@ function Options(props) {
             <div className="options">
                 <ol>
                     {[...currentOptions].slice(0,100).map((item, index) => (
-                        <li className="optionItem" key={item.word.word} value={index +1} onClick={() => onSelectWord(item.word.word.toUpperCase())}>{item.word.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
+                        <li className="optionItem" key={item.word} value={index +1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
                     ))}
                 </ol>
             </div>

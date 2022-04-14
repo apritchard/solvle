@@ -9,7 +9,6 @@ function Keyboard() {
 
     const {
         availableLetters,
-        currAttempt,
         onSelectLetter,
         onEnter,
         onDelete,
@@ -39,7 +38,7 @@ function Keyboard() {
                 });
             }
         },
-        [currAttempt]
+        [onDelete, onEnter, onSelectLetter]
     );
     useEffect(() => {
         document.addEventListener("keydown", handleKeyboard);

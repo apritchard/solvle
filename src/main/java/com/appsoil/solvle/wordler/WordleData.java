@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 @Data
 public class WordleData {
-    private Map<Character, LongAdder> characterCounts = new ConcurrentHashMap<>();
     private Map<Character, LongAdder> wordsWithCharacter = new ConcurrentHashMap<>();
     private LongAdder totalWords = new LongAdder();
     private Set<WordleResult> words;
@@ -20,7 +19,6 @@ public class WordleData {
         words.parallelStream().forEach(word -> {
             totalWords.increment();
             word.getLetters().forEach((key, value) -> {
-                characterCounts.computeIfAbsent(key, k -> new LongAdder()).add(value);
                 wordsWithCharacter.computeIfAbsent(key, k -> new LongAdder()).increment();
             });
         });

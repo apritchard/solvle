@@ -3,13 +3,13 @@ import {AppContext} from "../App";
 
 function Letter({letterPos, attemptVal}) {
     const {
-        board,
+        boardState,
         availableLetters, addAvailableLetter, removeAvailableLetter,
         unsureLetters, addUnsureLetter, removeUnsureLetter,
-        knownLetters, addKnownLetter, removeKnownLetter, currAttempt
+        knownLetters, addKnownLetter, removeKnownLetter
     } = useContext(AppContext);
 
-    const letter = board[attemptVal][letterPos];
+    const letter = boardState.board[attemptVal][letterPos];
     const available = availableLetters.has(letter);
     const unsure = unsureLetters.get(letterPos).has(letter);
     const known = letter !== "" && knownLetters.get(letterPos) === letter;
@@ -30,8 +30,8 @@ function Letter({letterPos, attemptVal}) {
     }
 
     const toggleState = () => {
-        console.log("attemptVal " + attemptVal + " currAttempt " + currAttempt.attempt);
-        if (attemptVal > currAttempt.attempt || letter === "") {
+        console.log("attemptVal " + attemptVal + " currAttempt " + boardState.currAttempt.attempt);
+        if (attemptVal > boardState.currAttempt.attempt || letter === "") {
             return;
         }
         console.log("old state for " + letter + ": " + letterState);
@@ -55,7 +55,7 @@ function Letter({letterPos, attemptVal}) {
                 console.log("returning letter to default " + letter);
                 removeKnownLetter(letterPos);
                 break;
-            case "huh":
+            default:
                 console.log("clearing letter " + letter);
                 removeKnownLetter(letterPos);
                 removeUnsureLetter(letterPos, letter);

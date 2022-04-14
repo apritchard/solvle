@@ -8,36 +8,71 @@ import Board from "./components/Board";
 import Keyboard from "./components/Keyboard";
 import React, {useState, createContext} from "react";
 import Options from "./components/Options";
+import Controls from "./components/Controls";
 
 export const AppContext = createContext();
 
 function App() {
-    const [availableLetters, setAvailableLetters] = useState(new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")));
-    const [knownLetters, setKnownLetters] = useState(() => {
+
+    const initialBoard = (rows, width) => {
+        let retArray = [];
+        for (let i = 0; i < rows; i++) {
+            retArray[i] = [];
+            for (let j = 0; j < width; j++) {
+                retArray[i][j] = "";
+            }
+        }
+        return retArray;
+    }
+
+    const initialBoardState = (rows, width) => {
+        return {
+            board: initialBoard(rows, width),
+            currAttempt: {
+                attempt: 0,
+                letter: 0
+            },
+            settings: {
+                wordLength: width,
+                attempts: rows
+            }
+        }
+    }
+
+    const [boardState, setBoardState] = useState(initialBoardState(6, 5));
+
+    const initialAvailableLetters = () => {
+        return new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
+    }
+
+    const initialKnownLetters = (width) => {
         let ret = new Map();
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < width; i++) {
             ret.set(i, "");
         }
         return ret;
-    });
-    const [unsureLetters, setUnsureLetters] = useState(() => {
+    }
+
+    const initialUnsureLetters = (width) => {
         let ret = new Map();
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < width; i++) {
             ret.set(i, new Set());
         }
         return ret;
-    });
+    }
+
+    const [availableLetters, setAvailableLetters] = useState(initialAvailableLetters());
+    const [knownLetters, setKnownLetters] = useState(initialKnownLetters(boardState.settings.wordLength));
+    const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
     const [currentOptions, setCurrentOptions] = useState(new Set());
 
-    const [board, setBoard] = useState([
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-    ]);
-    const [currAttempt, setCurrAttempt] = useState({attempt: 0, letter: 0});
+    const resetBoard = (rows, width) => {
+        setBoardState(initialBoardState(rows, width));
+        setAvailableLetters(initialAvailableLetters());
+        setUnsureLetters(initialUnsureLetters(width))
+        setKnownLetters(initialKnownLetters(width));
+        setCurrentOptions(new Set());
+    }
 
     const addKnownLetter = (pos, letter) => {
         setKnownLetters(prev => new Map(prev.set(pos, letter)));
@@ -70,48 +105,70 @@ function App() {
     }
 
     const onEnter = () => {
-        if (currAttempt.letter !== 5) return;
-
-        let currWord = "";
-        for (let i = 0; i < 5; i++) {
-            currWord += board[currAttempt.attempt][i];
+        if (boardState.currAttempt.letter !== boardState.settings.wordLength) {
+            return;
         }
-        setCurrAttempt({attempt: currAttempt.attempt + 1, letter: 0});
+
+        console.log("Updating board state");
+        setBoardState(prev => ({
+            ...prev,
+            board: prev.board,
+            currAttempt: {
+                attempt: boardState.currAttempt.attempt + 1,
+                letter: 0
+            }
+        }));
     };
 
     const onDelete = () => {
-        if (currAttempt.letter === 0) return;
-        const newBoard = [...board];
-        newBoard[currAttempt.attempt][currAttempt.letter - 1] = "";
-        setBoard(newBoard);
-        setCurrAttempt({...currAttempt, letter: currAttempt.letter - 1});
+        if (boardState.currAttempt.letter === 0) {
+            return;
+        }
+        const newBoard = [...boardState.board];
+        newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter - 1] = "";
+        setBoardState(prev => ({
+            ...prev,
+            board: newBoard,
+            currAttempt: {
+                attempt: boardState.currAttempt.attempt,
+                letter: boardState.currAttempt.letter -1
+            }
+        }));
     };
 
     const onSelectLetter = (key) => {
-        if (currAttempt.letter > 4) return;
-        const newBoard = [...board];
-        newBoard[currAttempt.attempt][currAttempt.letter] = key;
-        setBoard(newBoard);
-        setCurrAttempt({
-            attempt: currAttempt.attempt,
-            letter: currAttempt.letter + 1,
-        });
+        if (boardState.currAttempt.letter >= boardState.settings.wordLength ) {
+            return;
+        }
+        const newBoard = [...boardState.board];
+        newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter] = key;
+        setBoardState(prev => ({
+            ...prev,
+            board: newBoard,
+            currAttempt: {
+                attempt: boardState.currAttempt.attempt,
+                letter: boardState.currAttempt.letter +1
+            }
+        }));
     };
 
     const onSelectWord = (word) => {
-        console.log("Setting " + word + word.length + " " + currAttempt.attempt + currAttempt.letter);
-        if(currAttempt.letter !== 0) {
+        console.log("Setting " + word + word.length + " " + boardState.currAttempt.attempt + boardState.currAttempt.letter);
+        if(boardState.currAttempt.letter !== 0) {
             return;
         }
-        const newBoard = [...board];
+        const newBoard = [...boardState.board];
         for(let i = 0; i < word.length; i++) {
-            newBoard[currAttempt.attempt][i] = word[i];
+            newBoard[boardState.currAttempt.attempt][i] = word[i];
         }
-        setBoard(newBoard);
-        setCurrAttempt( {
-            attempt: currAttempt.attempt,
-            letter: word.length
-        });
+        setBoardState(prev => ({
+            ...prev,
+            board: newBoard,
+            currAttempt: {
+                attempt: boardState.currAttempt.attempt,
+                letter: word.length
+            }
+        }));
     }
 
     return (
@@ -121,10 +178,8 @@ function App() {
             </nav>
             <AppContext.Provider
                 value={{
-                    board,
-                    setBoard,
-                    currAttempt,
-                    setCurrAttempt,
+                    boardState,
+                    setBoardState,
                     onSelectLetter,
                     onDelete,
                     onEnter,
@@ -139,10 +194,12 @@ function App() {
                     removeAvailableLetter,
                     currentOptions,
                     setCurrentOptions,
-                    onSelectWord
+                    onSelectWord,
+                    resetBoard
                 }}
             >
                 <div className="game">
+                    <Controls />
                     <div className="parent">
                         <Board/>
                         <Options/>
