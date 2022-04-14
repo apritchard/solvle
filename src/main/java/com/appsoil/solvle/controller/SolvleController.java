@@ -1,12 +1,11 @@
 package com.appsoil.solvle.controller;
 
 import com.appsoil.solvle.service.SolvleService;
-import com.appsoil.solvle.wordler.Word;
-import com.appsoil.solvle.wordler.WordleData;
+import com.appsoil.solvle.wordler.WordleResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/solvle")
@@ -16,7 +15,11 @@ public class SolvleController {
     private SolvleService solvleService;
 
     @GetMapping("/{wordleString}")
-    public WordleData getValidWords(@PathVariable String wordleString, @RequestParam int wordLength, @RequestParam boolean wordleDict) {
-        return solvleService.getValidWords(wordleString.toLowerCase(), wordLength, wordleDict);
+    public List<WordleResult> getValidWords(@PathVariable String wordleString,
+                                            @RequestParam int wordLength,
+                                            @RequestParam(defaultValue="default") String wordleDict,
+                                            @RequestParam(defaultValue="50") int size) {
+        List<WordleResult> resultList = solvleService.getValidWords(wordleString.toLowerCase(), wordLength, wordleDict);
+        return resultList.subList(0, Math.min(size, resultList.size()));
     }
 }

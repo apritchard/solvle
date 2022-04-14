@@ -68,6 +68,8 @@ nav h1 {
   height: 550px;
   width: 160px;
   overflow-y:auto;
+  text-align: right;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .optionItem {

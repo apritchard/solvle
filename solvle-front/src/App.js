@@ -34,7 +34,8 @@ function App() {
             },
             settings: {
                 wordLength: width,
-                attempts: rows
+                attempts: rows,
+                results: 50
             }
         }
     }
@@ -65,7 +66,7 @@ function App() {
     const [knownLetters, setKnownLetters] = useState(initialKnownLetters(boardState.settings.wordLength));
     const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
     const [currentOptions, setCurrentOptions] = useState(new Set());
-    const [restrictWords, setRestrictWords] = useState(true);
+    const [dictionary, setDictionary] = useState("default");
 
     const resetBoard = (rows, width) => {
         setBoardState(initialBoardState(rows, width));
@@ -186,8 +187,8 @@ function App() {
                     availableLetters,
                     knownLetters,
                     unsureLetters,
-                    restrictWords,
-                    setRestrictWords,
+                    dictionary,
+                    setDictionary,
                     onSelectLetter,
                     onDelete,
                     onEnter,

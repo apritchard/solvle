@@ -1,19 +1,14 @@
 package com.appsoil.solvle.service;
 
+import com.appsoil.solvle.wordler.*;
 import com.appsoil.solvle.wordler.Dictionary;
-import com.appsoil.solvle.wordler.Word;
-import com.appsoil.solvle.wordler.WordleData;
-import com.appsoil.solvle.wordler.WordleInfo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,28 +23,34 @@ public class SolvleService {
     @Autowired
     Dictionary wordleDictionary;
 
-    @Cacheable
-    public WordleData getValidWords(String wordleString, int length, boolean wordleDict) {
+    @Qualifier("bigDictionary")
+    @Autowired
+    Dictionary bigDictionary;
+
+    @Qualifier("hugeDictionary")
+    @Autowired
+    Dictionary hugeDictionary;
+
+    private final int MAX_RESULT_LIST_SIZE = 100;
+
+    @Cacheable("validWords")
+    public List<WordleResult> getValidWords(String wordleString, int length, String wordleDict) {
         WordleInfo wordleInfo = new WordleInfo(wordleString);
         log.info("Searching for words of length {}", length);
-//        SortedSet<String> containedWords = dictionary.getWords().stream()
-//                .filter(w -> w.getLength() == length)
-//                .filter(w -> isValidWord(w, wordleInfo))
-//                .map(Word::getWord)
-//                .collect(Collectors.toCollection(() -> new TreeSet<>()));
-        Dictionary dictionary = length == 5  && wordleDict ? wordleDictionary : defaultDictionary;
-        SortedSet<Word> containedWords = dictionary.getWords().stream()
-                .filter(w -> w.getLength() == length)
+        Dictionary dictionary = switch(wordleDict) {
+            case "wordle" -> length == 5 ? wordleDictionary : defaultDictionary;
+            case "big" -> bigDictionary;
+            case "huge" -> hugeDictionary;
+            default -> defaultDictionary;
+        };
+        SortedSet<Word> containedWords = dictionary.getWordsBySize().get(length).stream()
                 .filter(w -> isValidWord(w, wordleInfo))
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
 
         WordleData wordleData = new WordleData(containedWords);
 
         log.info("Found " + wordleData.getTotalWords() + " viable matches.");
-        return wordleData;
-
-//        log.info("Found " + containedWords.size() + " viable matches.");
-//        return containedWords;
+        return wordleData.getWords().stream().limit(MAX_RESULT_LIST_SIZE).toList();
     }
 
     /**

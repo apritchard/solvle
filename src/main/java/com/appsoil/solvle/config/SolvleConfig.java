@@ -10,7 +10,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Configuration
@@ -19,7 +21,17 @@ public class SolvleConfig {
 
     @Bean(name="defaultDictionary")
     Dictionary getDictionary() {
+        return readResourceToDictionary("/dict2/wlist_match8.txt");
+    }
+
+    @Bean(name="bigDictionary")
+    Dictionary getBigDictionary() {
         return readResourceToDictionary("/dict2/enable1.txt");
+    }
+
+    @Bean(name="hugeDictionary")
+    Dictionary getHugeDictionary() {
+        return readResourceToDictionary("/dict2/big-dict-energy.txt");
     }
 
     @Bean(name="wordleDictionary")
@@ -30,14 +42,17 @@ public class SolvleConfig {
     private Dictionary readResourceToDictionary(String path) {
         log.info("Current path: " + System.getProperty("user.dir"));
         InputStream is = this.getClass().getResourceAsStream(path);
-        Set<Word> words = new HashSet<>();
+        Map<Integer, Set<Word>> dict = new HashMap<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         int count = 0;
 
         try {
             String word = br.readLine();
             while (word != null) {
-                words.add(new Word(word));
+                if(!dict.containsKey(word.length())) {
+                    dict.put(word.length(), new HashSet<>());
+                }
+                dict.get(word.length()).add(new Word(word));
                 word = br.readLine();
                 if (count++ % 10000 == 0) {
                     log.info(count - 1 + " read...");
@@ -48,7 +63,7 @@ public class SolvleConfig {
             throw new RuntimeException(ioe);
         }
 
-        log.info("Read in " + words.size() + " words");
-        return new Dictionary(words);
+        log.info("Read in " + count + " words");
+        return new Dictionary(dict);
     }
 }

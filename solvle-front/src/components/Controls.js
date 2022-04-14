@@ -5,8 +5,8 @@ import {AppContext} from "../App";
 function Controls() {
     const {
         boardState,
-        restrictWords,
-        setRestrictWords,
+        dictionary,
+        setDictionary,
         resetBoard
     } = useContext(AppContext);
 
@@ -38,8 +38,9 @@ function Controls() {
         resetBoard(boardState.settings.attempts, boardState.settings.wordLength);
     }
 
-    const toggleResetWords = () => {
-        setRestrictWords(!restrictWords);
+    const toggleResetWords = (event) => {
+        console.log("Setting")
+        setDictionary(event.target.value);
     }
 
     return (
@@ -49,10 +50,15 @@ function Controls() {
             <Button variant="primary" onClick={increaseAttempts}>Add Row</Button>
             <Button variant="secondary" onClick={decreaseAttempts}>Remove Row</Button>
             <Button variant="danger" onClick={clickReset}>Reset Board</Button>
-            <label title="Limits 5-character words to known Wordle wordlist">
-                <input type="checkbox" checked={restrictWords} onChange={toggleResetWords}  />
-                Restrict wordlist
-            </label>
+            <div onChange={toggleResetWords}>
+                Dictionary:
+                <span title="2315 words: https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt Only displays valid 5-letter wordle answers. Will use default dictionary for other word lengths.">
+                    <input checked={dictionary === "wordle"} type="radio" value="wordle" name="dict" /> Wordle
+                </span>
+                <span title="108814 words: https://www.keithv.com/software/wlist/ match8 list"><input checked={dictionary === "default"} type="radio" value="default" name="dict" /> Default</span>
+                <span title="172820 words: https://github.com/dolph/dictionary/blob/master/enable1.txt"><input checked={dictionary === "big"} type="radio" value="big" name="dict" /> Big</span>
+                <span title="370103 words: https://github.com/dwyl/english-words/blob/master/words_alpha.txt"><input checked={dictionary === "huge"} type="radio" value="huge" name="dict" /> Huge</span>
+            </div>
         </div>
     );
 }
