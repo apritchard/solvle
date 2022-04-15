@@ -40,7 +40,6 @@ public class SolvleConfig {
     }
 
     private Dictionary readResourceToDictionary(String path) {
-        log.info("Current path: " + System.getProperty("user.dir"));
         InputStream is = this.getClass().getResourceAsStream(path);
         Map<Integer, Set<Word>> dict = new HashMap<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -59,11 +58,10 @@ public class SolvleConfig {
                 }
             }
         } catch (IOException ioe) {
-            log.info("Error parsing dictionary");
-            throw new RuntimeException(ioe);
+            throw new RuntimeException("Error parsing dictionary", ioe);
         }
 
-        log.info("Read in " + count + " words");
+        log.info("Read " + count + " words from " + path);
         return new Dictionary(dict);
     }
 }
