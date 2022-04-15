@@ -18,26 +18,29 @@ function Options(props) {
     useEffect(() => {
         console.log("Building WordleString")
         console.log("Available letters: " + [...availableLetters]);
-        let wordleString = [...availableLetters].join("");
 
-        knownLetters.forEach((letter, pos) => {
-            if (letter !== "") {
-                console.log("Known letter " + letter + " pos " + pos);
-                wordleString += "" + letter + (pos + 1);
-            }
-        });
+        let wordleString = "";
 
-        unsureLetters.forEach((letter, pos) => {
-            for (let i = 0; i < letter.size; i++) {
-                console.log("unsure letters " + [...letter] + " pos " + pos);
-                wordleString += "" + [...letter][i] + "!" + (pos + 1);
-            }
-        });
-
-        if(availableLetters.size === 26 && wordleString.length === 26) {
-            console.log("All words available, skipping request");
-            return;
-        }
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").filter(letter => availableLetters.has(letter)).forEach(letter => {
+            wordleString += letter;
+            knownLetters.forEach((l, pos) => {
+                if (l === letter) {
+                    console.log("Known letter " + letter + " pos " + (pos+1));
+                    wordleString += (pos +1);
+                }
+            });
+            let hasUnsure = false;
+            unsureLetters.forEach((letters, pos) => {
+                if(letters.has(letter)) {
+                    if(!hasUnsure) {
+                        hasUnsure = true;
+                        wordleString += "!";
+                    }
+                    console.log("unsure letter " + letter + " pos " + (pos+1));
+                    wordleString += (pos+1);
+                }
+            });
+        })
 
         console.log("Fetching " + wordleString);
         fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=" + dictionary)
