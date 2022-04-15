@@ -1,5 +1,6 @@
 package com.appsoil.solvle.service;
 
+import com.appsoil.solvle.controller.WordleDTO;
 import com.appsoil.solvle.wordler.*;
 import com.appsoil.solvle.wordler.Dictionary;
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +35,7 @@ public class SolvleService {
     private final int MAX_RESULT_LIST_SIZE = 100;
 
     @Cacheable("validWords")
-    public List<WordleResult> getValidWords(String wordleString, int length, String wordleDict) {
+    public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int size) {
         WordleInfo wordleInfo = new WordleInfo(wordleString);
         log.info("Searching for words of length {}", length);
         Dictionary dictionary = switch(wordleDict) {
@@ -50,7 +51,7 @@ public class SolvleService {
         WordleData wordleData = new WordleData(containedWords);
 
         log.info("Found " + wordleData.getTotalWords() + " viable matches.");
-        return wordleData.getWords().stream().limit(MAX_RESULT_LIST_SIZE).toList();
+        return new WordleDTO(wordleData.getWords().stream().limit(Math.min(size,MAX_RESULT_LIST_SIZE)).toList(), wordleData.getTotalWords().intValue(), wordleData.getWordsWithCharacter());
     }
 
     /**

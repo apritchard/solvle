@@ -9,6 +9,7 @@ import Keyboard from "./components/Keyboard";
 import React, {useState, createContext} from "react";
 import Options from "./components/Options";
 import Controls from "./components/Controls";
+import { MdHelp } from 'react-icons/md';
 
 export const AppContext = createContext();
 
@@ -62,10 +63,18 @@ function App() {
         return ret;
     }
 
+    const initialOptions = () => {
+        return {
+            wordList: new Set(),
+            wordsWithCharacter: new Map(),
+            totalWords: 0
+        }
+    }
+
     const [availableLetters, setAvailableLetters] = useState(initialAvailableLetters());
     const [knownLetters, setKnownLetters] = useState(initialKnownLetters(boardState.settings.wordLength));
     const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
-    const [currentOptions, setCurrentOptions] = useState(new Set());
+    const [currentOptions, setCurrentOptions] = useState(initialOptions());
     const [dictionary, setDictionary] = useState("default");
 
     const resetBoard = (rows, width) => {
@@ -73,7 +82,7 @@ function App() {
         setAvailableLetters(initialAvailableLetters());
         setUnsureLetters(initialUnsureLetters(width))
         setKnownLetters(initialKnownLetters(width));
-        setCurrentOptions(new Set());
+        setCurrentOptions(initialOptions());
     }
 
     const addKnownLetter = (pos, letter) => {
@@ -156,9 +165,6 @@ function App() {
 
     const onSelectWord = (word) => {
         console.log("Setting " + word + word.length + " " + boardState.currAttempt.attempt + boardState.currAttempt.letter);
-        if(boardState.currAttempt.letter !== 0) {
-            return;
-        }
         const newBoard = [...boardState.board];
         for(let i = 0; i < word.length; i++) {
             newBoard[boardState.currAttempt.attempt][i] = word[i];
@@ -173,10 +179,19 @@ function App() {
         }));
     }
 
+    const helpText = "Type or press letters to enter your word, then click or tap on the board to toggle the letter state." +
+        " Type or press the enter button to advance the word choice to the next line. " +
+        "Tap a word from the options list on the right to automatically enter it on your current line.";
+
     return (
         <div className="App">
             <nav>
-                <h1>Solvle</h1>
+                <div className="header">
+                    <span><h1>Solvle</h1></span>
+                    <div  className="helpIcon">
+                        <MdHelp onClick={() => alert(helpText)} title={helpText}/>
+                    </div>
+                </div>
             </nav>
             <AppContext.Provider
                 value={{

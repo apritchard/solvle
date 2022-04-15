@@ -55,8 +55,9 @@ function Options(props) {
 
         <div>
             <div className="options">
+                {currentOptions.totalWords + " " + boardState.settings.wordLength + "-letter words"}
                 <ol>
-                    {[...currentOptions].slice(0,100).map((item, index) => (
+                    {[...currentOptions.wordList].slice(0,100).map((item, index) => (
                         <li className="optionItem" key={item.word} value={index +1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
                     ))}
                 </ol>

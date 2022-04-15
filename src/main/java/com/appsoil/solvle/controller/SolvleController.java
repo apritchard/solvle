@@ -15,11 +15,10 @@ public class SolvleController {
     private SolvleService solvleService;
 
     @GetMapping("/{wordleString}")
-    public List<WordleResult> getValidWords(@PathVariable String wordleString,
+    public WordleDTO getValidWords(@PathVariable String wordleString,
                                             @RequestParam int wordLength,
                                             @RequestParam(defaultValue="default") String wordleDict,
-                                            @RequestParam(defaultValue="50") int size) {
-        List<WordleResult> resultList = solvleService.getValidWords(wordleString.toLowerCase(), wordLength, wordleDict);
-        return resultList.subList(0, Math.min(size, resultList.size()));
+                                            @RequestParam(defaultValue="100") int size) {
+        return solvleService.getValidWords(wordleString.toLowerCase(), wordLength, wordleDict, size);
     }
 }
