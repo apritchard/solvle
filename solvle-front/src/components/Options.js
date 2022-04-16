@@ -61,6 +61,12 @@ function Options(props) {
                         <li className="optionItem" key={item.word} value={index +1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
                     ))}
                 </ol>
+                <div title="Words that maximize the unused letters, but are not required to use known letters">Fishing words:</div>
+                <ol>
+                    {[...currentOptions.fishingWords].slice(0, 100).map((item, index) => (
+                        <li className="optionItem" key={"fish" + item.word} value={index+1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
+                    ))}
+                </ol>
             </div>
         </div>
 

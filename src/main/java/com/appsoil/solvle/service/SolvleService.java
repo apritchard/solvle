@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,7 @@ public class SolvleService {
     Dictionary hugeDictionary;
 
     private final int MAX_RESULT_LIST_SIZE = 100;
+    private final int FISHING_WORD_SIZE = 10;
 
     @Cacheable("validWords")
     public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int size) {
@@ -44,14 +47,28 @@ public class SolvleService {
             case "huge" -> hugeDictionary;
             default -> defaultDictionary;
         };
-        SortedSet<Word> containedWords = dictionary.getWordsBySize().get(length).stream()
+        SortedSet<Word> containedWords = dictionary.getWordsBySize().get(length).parallelStream()
                 .filter(w -> isValidWord(w, wordleInfo))
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
 
         WordleData wordleData = new WordleData(containedWords);
 
         log.info("Found " + wordleData.getTotalWords() + " viable matches.");
-        return new WordleDTO(wordleData.getWords().stream().limit(Math.min(size,MAX_RESULT_LIST_SIZE)).toList(), wordleData.getTotalWords().intValue(), wordleData.getWordsWithCharacter());
+
+        //get best fishing words. Fishing words contain the most letters present in available word set without regard for requirements
+        // and exclude the letters you already know
+
+        List<WordleResult> fishingWords = new ArrayList<>();
+        if(wordleData.getTotalWords().intValue() > 0) {
+            Map<Character, LongAdder> newMap = wordleData.getWordsWithCharacter().entrySet().stream()
+                    .filter(es -> !wordleInfo.getRequiredLetters().contains(es.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, ConcurrentHashMap::new));
+
+            fishingWords = dictionary.getWordsBySize().get(length).parallelStream()
+                    .map(word -> new WordleResult(word, newMap, wordleData.getTotalWords().doubleValue())).sorted().limit(FISHING_WORD_SIZE).toList();
+        }
+
+        return new WordleDTO(wordleData.getWords().stream().limit(Math.min(size,MAX_RESULT_LIST_SIZE)).toList(), fishingWords, wordleData.getTotalWords().intValue(), wordleData.getWordsWithCharacter());
     }
 
     /**

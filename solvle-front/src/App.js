@@ -66,6 +66,7 @@ function App() {
     const initialOptions = () => {
         return {
             wordList: new Set(),
+            fishingWords: new Set(),
             wordsWithCharacter: new Map(),
             totalWords: 0
         }
