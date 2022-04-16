@@ -9,7 +9,7 @@ function Board() {
 
     let rows = [];
     for(let i = 0; i < boardState.settings.attempts; i++) {
-        rows.push(<Row attempt={i} />);
+        rows.push(<Row key={"row" + i} attempt={i} />);
     }
 
     return (

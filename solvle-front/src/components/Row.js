@@ -9,7 +9,7 @@ function Row({attempt}) {
 
     let letters = [];
     for(let i = 0; i < boardState.settings.wordLength; i++) {
-        letters.push(<Letter letterPos={i} attemptVal={attempt}/>);
+        letters.push(<Letter key={"letter" + i + boardState.currAttempt.attempt} letterPos={i} attemptVal={attempt}/>);
     }
 
     return (

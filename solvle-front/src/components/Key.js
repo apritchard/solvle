@@ -22,7 +22,7 @@ function Key({keyVal, bigKey, disabled}) {
             >
                 {keyVal}
             </div>
-            <div className="letterAmt" id={keyVal + "Amt"}>
+            <div className="letterAmt" id={keyVal + "Amt"} title={"" + currentOptions.wordsWithCharacter[keyVal.toLowerCase()] + " viable words contain the letter " + keyVal}>
                 {bigKey ? "" : currentOptions.wordsWithCharacter[keyVal.toLowerCase()] > 0 ? currentOptions.wordsWithCharacter[keyVal.toLowerCase()] : 0}
             </div>
         </div>

@@ -115,6 +115,48 @@ function App() {
         });
     }
 
+    const clearPosition = (attempt, pos, replacementLetter) => {
+        //get letter
+        let oldLetter = boardState.board[attempt][pos];
+
+        //if replacement letter same as old letter, bail
+        if(oldLetter === replacementLetter || oldLetter === '') {
+            return;
+        }
+
+        //if old letter in same position on a different word, make no changes
+        for(let row = 0; row < boardState.currAttempt.attempt; row++) {
+            if(boardState.board[row][pos] === oldLetter) {
+                console.log("letter " + oldLetter + " found in attempt " + row + ", making no updates");
+                return;
+            }
+        }
+
+        console.log("Removing " + oldLetter + " from unsure list for position " + pos);
+        removeUnsureLetter(pos, oldLetter);
+
+        if(knownLetters.get(pos) === oldLetter) {
+            console.log("Clearing position " + pos + " of known letter " + oldLetter);
+            removeKnownLetter(pos);
+        }
+
+        //if old letter is anywhere on the board, leave its available status alone
+        for(let row = 0; row < boardState.currAttempt.attempt; row++) {
+            for(let x = 0; x < boardState.settings.wordLength; x++) {
+                if(boardState.board[row][x] === oldLetter) {
+                    console.log("Letter " + oldLetter + " elsewhere on board, not updating its availability");
+                    return;
+                }
+            }
+        }
+
+        if(!availableLetters.has(oldLetter)) {
+            console.log("Restoring " + oldLetter + " to availability list");
+            availableLetters.add(oldLetter);
+        }
+
+    }
+
     const onEnter = () => {
         if (boardState.currAttempt.letter !== boardState.settings.wordLength) {
             return;
@@ -135,6 +177,7 @@ function App() {
         if (boardState.currAttempt.letter === 0) {
             return;
         }
+        clearPosition(boardState.currAttempt.attempt, boardState.currAttempt.letter-1);
         const newBoard = [...boardState.board];
         newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter - 1] = "";
         setBoardState(prev => ({
@@ -167,6 +210,7 @@ function App() {
         console.log("Setting " + word + word.length + " " + boardState.currAttempt.attempt + boardState.currAttempt.letter);
         const newBoard = [...boardState.board];
         for(let i = 0; i < word.length; i++) {
+            clearPosition(boardState.currAttempt.attempt, i, word[i]);
             newBoard[boardState.currAttempt.attempt][i] = word[i];
         }
         setBoardState(prev => ({
