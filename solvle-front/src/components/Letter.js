@@ -38,7 +38,7 @@ function Letter({letterPos, attemptVal}) {
         switch (letterState) {
             case "":
                 console.log("adding error " + letter);
-                removeKnownLetter(letterPos);
+                removeKnownLetter(letterPos, letter);
                 removeAvailableLetter(letter);
                 break;
             case "error":
@@ -53,11 +53,11 @@ function Letter({letterPos, attemptVal}) {
                 break;
             case "correct":
                 console.log("returning letter to default " + letter);
-                removeKnownLetter(letterPos);
+                removeKnownLetter(letterPos, letter);
                 break;
             default:
                 console.log("clearing letter " + letter);
-                removeKnownLetter(letterPos);
+                removeKnownLetter(letterPos, letter);
                 removeUnsureLetter(letterPos, letter);
                 break;
         }

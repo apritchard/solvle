@@ -10,6 +10,7 @@ import React, {useState, createContext} from "react";
 import Options from "./components/Options";
 import Controls from "./components/Controls";
 import { MdHelp } from 'react-icons/md';
+import SolvleAlert from "./components/SolvleAlert";
 
 export const AppContext = createContext();
 
@@ -90,8 +91,10 @@ function App() {
         setKnownLetters(prev => new Map(prev.set(pos, letter)));
     }
 
-    const removeKnownLetter = (pos) => {
-        setKnownLetters(prev => new Map(prev.set(pos, "")));
+    const removeKnownLetter = (pos, letter) => {
+        if(knownLetters.get(pos) === letter) {
+            setKnownLetters(prev => new Map(prev.set(pos, "")));
+        }
     }
 
     const addUnsureLetter = (pos, letter) => {
@@ -136,10 +139,8 @@ function App() {
         console.log("Removing " + oldLetter + " from unsure list for position " + pos);
         removeUnsureLetter(pos, oldLetter);
 
-        if(knownLetters.get(pos) === oldLetter) {
-            console.log("Clearing position " + pos + " of known letter " + oldLetter);
-            removeKnownLetter(pos);
-        }
+        console.log("Clearing position " + pos + " of known letter " + oldLetter);
+        removeKnownLetter(pos, oldLetter);
 
         //if old letter is anywhere on the board, leave its available status alone
         for(let row = 0; row < boardState.currAttempt.attempt; row++) {
@@ -224,17 +225,21 @@ function App() {
         }));
     }
 
-    const helpText = "Type or press letters to enter your word, then click or tap on the board to toggle the letter state." +
-        " Type or press the enter button to advance the word choice to the next line. " +
-        "Tap a word from the options list on the right to automatically enter it on your current line.";
+    const helpText = <ul>
+        <li>Type letters or tap the on-screen keyboard to enter a word.</li>
+        <li>Click the letters you've entered to mark them gray (unavailable), yellow (required, but wrong position), or green (correct position).</li>
+        <li>Press ENTER to advance the word choice to the next line.</li>
+        <li>Available words appear on the right. You can click them to automatically enter a word on the current line.</li>
+        <li>Numbers under each letter on the keyboard indicate how many of the available words include that letter.</li>
+    </ul>
 
     return (
         <div className="App">
             <nav>
                 <div className="header">
                     <span><h1>Solvle</h1></span>
-                    <div  className="helpIcon">
-                        <MdHelp onClick={() => alert(helpText)} title={helpText}/>
+                    <div className="helpIcon">
+                        <MdHelp title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
                     </div>
                 </div>
             </nav>
@@ -264,6 +269,7 @@ function App() {
             >
                 <div className="game">
                     <Controls />
+                    <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool" message={helpText}/>
                     <div className="parent">
                         <Board/>
                         <Options/>

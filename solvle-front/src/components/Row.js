@@ -13,7 +13,7 @@ function Row({attempt}) {
     }
 
     return (
-        <div className="row" id={boardState.currAttempt.attempt===attempt? "highlight" : ("row" + attempt)}>
+        <div className="solvle-row" id={boardState.currAttempt.attempt===attempt? "highlight" : ("row" + attempt)}>
             {letters}
         </div>
     );
