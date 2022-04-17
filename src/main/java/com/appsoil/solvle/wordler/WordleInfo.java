@@ -18,9 +18,9 @@ public class WordleInfo extends Word {
     private Map<Integer, Character> letterPositions = new HashMap<>();
     private Map<Integer, Set<Character>> positionExclusions = new HashMap<>();
 
-    //parses a string of letters. Letters may be followed by either a number, a question mark, or both
-    // for example abc3d!e!45fg! will be parsed into (a)(b)(c3)(d!)(e!45)(f)(g!)
-    Pattern wordleRegex = Pattern.compile("(\\S)(\\d)*(\\!\\d*)*");
+    //parses a string of letters. Letters may be followed by numbers, an exclamation mark, or both
+    // for example abc3d!e!45fg5!2 will be parsed into (a)(b)(c3)(d!)(e!45)(f)(g5!2)
+    Pattern wordleRegex = Pattern.compile("(\\S)(\\d*)(\\!\\d*)*");
 
     /**
      * Creates a description of known wordle knowledge based on provided input string.
@@ -29,11 +29,11 @@ public class WordleInfo extends Word {
      *             by an exclamation (!), that letter is required, but we don't know where. If the ! is followed
      *             by numbers, those indicate positions we know are not available.
      *
-     *             For example: ac1t*2u - this string tells us:
-     *                  a   - available
-     *                  c1  - required in position 1
-     *                  t!12- required, but NOT in positions 1 or 2
-     *                  u   - available
+     *             For example: ac1t!2u3!4 - this string tells us:
+     *                  a    - available
+     *                  c1   - required in position 1
+     *                  t!12 - required, but NOT in positions 1 or 2
+     *                  u3!4 - required in 3, not allowed in 4
      */
     public WordleInfo(String word) {
         super(word.replaceAll("[^A-Za-z]", "")); //create a base Word with only alpha
@@ -43,8 +43,8 @@ public class WordleInfo extends Word {
         Matcher matcher = wordleRegex.matcher(word);
         while(matcher.find()) {
             char c = matcher.group(1).charAt(0);
-            boolean hasPos = matcher.group(2) != null;
-            boolean required = matcher.group(3) != null;
+            boolean hasPos = matcher.group(2) != null && matcher.group(2) != "";
+            boolean required = matcher.group(3) != null && matcher.group(3) != "";
 
             if(required || hasPos) {
                 requiredLetters.add(c);

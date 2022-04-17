@@ -34,41 +34,44 @@ public class SolvleService {
     @Autowired
     Dictionary hugeDictionary;
 
+    @Autowired
+    WordCalculationService wordCalculationService;
+
     private final int MAX_RESULT_LIST_SIZE = 100;
     private final int FISHING_WORD_SIZE = 10;
 
     @Cacheable("validWords")
-    public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int size) {
-        WordleInfo wordleInfo = new WordleInfo(wordleString);
+    public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int numSuggestions) {
         log.info("Searching for words of length {}", length);
+
+        // parse the string to identify required letters and position exclusions
+        WordleInfo wordleInfo = new WordleInfo(wordleString);
+
         Dictionary dictionary = switch(wordleDict) {
             case "wordle" -> length == 5 ? wordleDictionary : defaultDictionary;
             case "big" -> bigDictionary;
             case "huge" -> hugeDictionary;
             default -> defaultDictionary;
         };
+
+        // step 1: find all the valid words in our dictionary for this wordle string
         SortedSet<Word> containedWords = dictionary.getWordsBySize().get(length).parallelStream()
                 .filter(w -> isValidWord(w, wordleInfo))
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
 
-        WordleData wordleData = new WordleData(containedWords);
+        // step 2: calculate how many words in the valid word set contain each character
+        Map<Character, LongAdder> characterCounts = wordCalculationService.calculateCharacterCounts(containedWords);
 
-        log.info("Found " + wordleData.getTotalWords() + " viable matches.");
+        // step 3: calculate the frequency score for each word in the available list.
+        Set<WordFrequencyScore> wordFrequencyScores = wordCalculationService
+                .calculateWordleResults(containedWords, characterCounts, containedWords.size(), Math.min(numSuggestions,MAX_RESULT_LIST_SIZE));
 
-        //get best fishing words. Fishing words contain the most letters present in available word set without regard for requirements
-        // and exclude the letters you already know
+        // step 4: calculate words containing the most letters present, regardless off letter requirements
+        Set<WordFrequencyScore> fishingWords = containedWords.size() < 1 ? new HashSet<>() : wordCalculationService
+                .calculateFishingWords(dictionary.getWordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordleInfo.getRequiredLetters());
 
-        List<WordleResult> fishingWords = new ArrayList<>();
-        if(wordleData.getTotalWords().intValue() > 0) {
-            Map<Character, LongAdder> newMap = wordleData.getWordsWithCharacter().entrySet().stream()
-                    .filter(es -> !wordleInfo.getRequiredLetters().contains(es.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, ConcurrentHashMap::new));
-
-            fishingWords = dictionary.getWordsBySize().get(length).parallelStream()
-                    .map(word -> new WordleResult(word, newMap, wordleData.getTotalWords().doubleValue())).sorted().limit(FISHING_WORD_SIZE).toList();
-        }
-
-        return new WordleDTO(wordleData.getWords().stream().limit(Math.min(size,MAX_RESULT_LIST_SIZE)).toList(), fishingWords, wordleData.getTotalWords().intValue(), wordleData.getWordsWithCharacter());
+        log.info("Found " + containedWords.size() + " viable matches.");
+        return new WordleDTO(wordFrequencyScores, fishingWords, containedWords.size(), characterCounts);
     }
 
     /**
