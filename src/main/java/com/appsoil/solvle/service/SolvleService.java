@@ -42,7 +42,8 @@ public class SolvleService {
 
     @Cacheable("validWords")
     public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int numSuggestions) {
-        log.info("Searching for words of length {}", length);
+
+        log.debug("Searching for words of length {}", length);
 
         // parse the string to identify required letters and position exclusions
         WordleInfo wordleInfo = new WordleInfo(wordleString);
@@ -70,7 +71,7 @@ public class SolvleService {
         Set<WordFrequencyScore> fishingWords = containedWords.size() < 1 ? new HashSet<>() : wordCalculationService
                 .calculateFishingWords(dictionary.getWordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordleInfo.getRequiredLetters());
 
-        log.info("Found " + containedWords.size() + " viable matches.");
+        log.info("Found {} length {} matches for {}", containedWords.size(), length, wordleString);
         return new WordleDTO(wordFrequencyScores, fishingWords, containedWords.size(), characterCounts);
     }
 

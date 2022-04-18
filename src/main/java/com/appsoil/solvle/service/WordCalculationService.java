@@ -81,8 +81,7 @@ public class WordCalculationService {
         return calculateWordleResults(allWords, newMap, viableWordsCount, sizeLimit);
     }
 
-
-    private Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, Double totalWords) {
+    protected Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, Double totalWords) {
         if(totalWords < 1) {
             return 0.0;
         }

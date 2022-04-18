@@ -38,7 +38,7 @@ public class WordleInfo extends Word {
     public WordleInfo(String word) {
         super(word.replaceAll("[^A-Za-z]", "")); //create a base Word with only alpha
 
-        log.info("Parsing wordle characters " + word);
+        log.debug("Parsing wordle characters " + word);
 
         Matcher matcher = wordleRegex.matcher(word);
         while(matcher.find()) {
