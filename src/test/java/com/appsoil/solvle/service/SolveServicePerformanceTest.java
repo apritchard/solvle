@@ -65,7 +65,7 @@ public class SolveServicePerformanceTest {
                 .jvmArgs("-server")
                 .build();
 
-        new Runner(jmhRunnerOptions).run();
+//        new Runner(jmhRunnerOptions).run();
     }
 
     @Setup

@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  solvleback:
+    image: apritchard/solvle-back:0.1
+    build: ./
+    container_name: server
+    ports:
+      - '8081:8081'
+  solvlefront:
+    image: apritchard/solvle-front:0.1
+    build: ./solvle-front
+    container_name: front
+    ports:
+      - '80:80'
+    stdin_open: true
+    tty: true
