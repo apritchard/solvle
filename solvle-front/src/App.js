@@ -77,7 +77,7 @@ function App() {
     const [knownLetters, setKnownLetters] = useState(initialKnownLetters(boardState.settings.wordLength));
     const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
     const [currentOptions, setCurrentOptions] = useState(initialOptions());
-    const [dictionary, setDictionary] = useState("default");
+    const [dictionary, setDictionary] = useState("wordle");
 
     const resetBoard = (rows, width) => {
         setBoardState(initialBoardState(rows, width));
