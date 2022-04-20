@@ -1,21 +1,29 @@
 import React, {useState} from 'react';
 import {Alert, Button} from "react-bootstrap";
 
-function SolvleAlert({heading, message, persist, persistMessage}) {
-    const [show, setShow] = useState(true);
+function SolvleAlert({heading, message, persist, persistMessage, persistVariant}) {
+    const [show, setShow] = useState(localStorage.getItem("helpSeen") !== 'true');
 
     if (show) {
         return (
-            <Alert variant="info" onClose={() => setShow(false)} dismissible>
+            <div>
+            <Alert className="alertDialog" variant="info" onClose={() => {
+                localStorage.setItem("helpSeen", 'true');
+                setShow(false);
+            }} dismissible>
                 <Alert.Heading>{heading} </Alert.Heading>
-                <p className="instructions">
+                <div className="instructions">
                     {message}
-                </p>
+                </div>
             </Alert>
+            </div>
         );
     }
     if (persist) {
-        return <Button onClick={() => setShow(true)}>{persistMessage}</Button>;
+        return <Button className="alertButton" variant={persistVariant} onClick={() => {
+            localStorage.setItem("helpSeen", 'false');
+            setShow(true);
+        }}>{persistMessage}</Button>;
     }
 }
 

@@ -198,3 +198,16 @@ nav h1 {
   white-space: pre-line;
   text-align:left;
 }
+
+.header .alertButton {
+  height: 90%;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.header .alertDialog {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+}

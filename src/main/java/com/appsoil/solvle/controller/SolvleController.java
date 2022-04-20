@@ -11,6 +11,7 @@ public class SolvleController {
     @Autowired
     private SolvleService solvleService;
 
+    @CrossOrigin
     @GetMapping("/{wordleString}")
     public WordleDTO getValidWords(@PathVariable String wordleString,
                                             @RequestParam int wordLength,

@@ -225,19 +225,28 @@ function App() {
         }));
     }
 
-    const helpText = <ul>
+    const helpText = <div><div>Solvle is a tool that helps evaluate potential candidate words based on available letters.
+        One way to use it is to type in words you tried in other puzzle games and mark which letters are known or unavailable.
+        The list of available words on the right will update to reflect which words are left. Words are ranked based
+        on how many of their letters are shared by other words in the set.</div>
+        <ul>
         <li>Type letters or tap the on-screen keyboard to enter a word.</li>
         <li>Click the letters you've entered to mark them gray (unavailable), yellow (required, but wrong position), or green (correct position).</li>
         <li>Press ENTER to advance the word choice to the next line.</li>
         <li>Available words appear on the right. You can click them to automatically enter a word on the current line.</li>
         <li>Numbers under each letter on the keyboard indicate how many of the available words include that letter.</li>
-    </ul>
+    </ul></div>
 
     return (
         <div className="App">
             <nav>
                 <div className="header">
-                    <span><h1>Solvle</h1></span>
+                    <h1>Solvle</h1>
+                    <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool"
+                                 message={helpText}
+                                 persist={true}
+                                 persistMessage={"?"}
+                                 persistVariant={"dark"}/>
                     <div className="helpIcon">
                         <MdHelp title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
                     </div>
@@ -269,7 +278,6 @@ function App() {
             >
                 <div className="game">
                     <Controls />
-                    <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool" message={helpText}/>
                     <div className="parent">
                         <Board/>
                         <Options/>

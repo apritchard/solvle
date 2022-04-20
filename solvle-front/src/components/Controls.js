@@ -10,32 +10,43 @@ function Controls() {
         resetBoard
     } = useContext(AppContext);
 
-    const increaseWordLength = () => {
+    // prevent buttons from accidentally activating a second time when users press ENTER
+    const releaseFocus = (e) => {
+        if (e && e.target) {
+            e.target.blur();
+        }
+    }
+    const increaseWordLength = (e) => {
         if(boardState.settings.wordLength > 8) {
             return;
         }
         resetBoard(boardState.settings.attempts, boardState.settings.wordLength +1);
+        releaseFocus(e);
     }
-    const decreaseWordLength = () => {
+    const decreaseWordLength = (e) => {
         if(boardState.settings.wordLength < 3) {
             return;
         }
         resetBoard(boardState.settings.attempts, boardState.settings.wordLength -1);
+        releaseFocus(e);
     }
 
-    const increaseAttempts = () => {
+    const increaseAttempts = (e) => {
         resetBoard(boardState.settings.attempts + 1, boardState.settings.wordLength);
+        releaseFocus(e);
     }
 
-    const decreaseAttempts = () => {
+    const decreaseAttempts = (e) => {
         if(boardState.settings.attempts < 2) {
             return;
         }
         resetBoard(boardState.settings.attempts - 1, boardState.settings.wordLength);
+        releaseFocus(e);
     }
 
-    const clickReset = () => {
+    const clickReset = (e) => {
         resetBoard(boardState.settings.attempts, boardState.settings.wordLength);
+        releaseFocus(e);
     }
 
     const toggleResetWords = (event) => {
