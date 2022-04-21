@@ -122,7 +122,7 @@ public class SolveServicePerformanceTest {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkWordleResults() {
-        staticWordService.calculateWordleResults(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 100 );
+        staticWordService.calculateWordleResults(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 0, 100 );
     }
 
 //    @Benchmark
@@ -146,7 +146,7 @@ public class SolveServicePerformanceTest {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkFreqScore() {
-        dictionary.getWordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScore(word, fullDictionarycharacters, (double)dictionary.getWordsBySize().get(5).size()));
+        dictionary.getWordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScore(word, fullDictionarycharacters, 0, dictionary.getWordsBySize().get(5).size()));
     }
 //
 //    @Benchmark

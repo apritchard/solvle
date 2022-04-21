@@ -40,34 +40,32 @@ public class WordCalculationServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "later, alert, 5.0",
-            "abcde, abcdd, 4.0",
-            "abcde, aaaaa, 1.0",
+            "later, alert, 1.0",
+            "abcde, abcdd, 0.8",
+            "abcde, aaaaa, 0.2",
             "abcde, fghij, 0.0"})
     void calculateWordleResults_singleSourceAndWord_returnsNumberOfSourceCharacters(String sourceWord, String viableWord, double score) {
         Map<Character, LongAdder> counts = wordCalculationService.calculateCharacterCounts(Set.of(new Word(sourceWord)));
         Set<Word> viableWords = Set.of(new Word(viableWord));
 
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateWordleResults(viableWords, counts, 1, 100);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateWordleResults(viableWords, counts, 1, 0, 100);
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
     }
 
     @ParameterizedTest
     @CsvSource({
-            "later, alert, 5.0, b",
-            "later, alert, 4.0, a",
-            "abcde, abcdd, 4.0, e",
-            "abcde, abcdd, 3.0, d",
-            "abcde, aaaaa, 1.0, e",
-            "abcde, aaaaa, 0.0, a",
-            "abcde, fghij, 0.0, a",
+            "later, alert, 1.0, a",
+            "abcde, abcdd, 0.75, d",
+            "abcde, aaaae, 0.25, e",
+            "abcde, aaacd, 0.5, a",
+            "abcde, aahij, 0.0, a",
             "abcde, fghij, 0.0, g"})
-    void calculateFishingWords_singleSourceAndWord_excludesCharactersFromCount(String sourceWord, String viableWord, double score, Character excludedChar) {
+    void calculateFishingWords_singleSourceAndWord_excludesCharactersFromCount(String sourceWord, String viableWord, double score, Character requiredChar) {
         Map<Character, LongAdder> counts = wordCalculationService.calculateCharacterCounts(Set.of(new Word(sourceWord)));
         Set<Word> viableWords = Set.of(new Word(viableWord));
 
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWords(viableWords, counts, 1, 100, Set.of(excludedChar));
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWords(viableWords, counts, 1, 100, Set.of(requiredChar));
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
     }

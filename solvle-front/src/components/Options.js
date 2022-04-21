@@ -1,5 +1,7 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {AppContext} from "../App";
+import OptionTab from "./OptionTab";
+import {Tab, Tabs} from "react-bootstrap";
 
 function Options(props) {
 
@@ -25,19 +27,19 @@ function Options(props) {
             wordleString += letter;
             knownLetters.forEach((l, pos) => {
                 if (l === letter) {
-                    console.log("Known letter " + letter + " pos " + (pos+1));
-                    wordleString += (pos +1);
+                    console.log("Known letter " + letter + " pos " + (pos + 1));
+                    wordleString += (pos + 1);
                 }
             });
             let hasUnsure = false;
             unsureLetters.forEach((letters, pos) => {
-                if(letters.has(letter)) {
-                    if(!hasUnsure) {
+                if (letters.has(letter)) {
+                    if (!hasUnsure) {
                         hasUnsure = true;
                         wordleString += "!";
                     }
-                    console.log("unsure letter " + letter + " pos " + (pos+1));
-                    wordleString += (pos+1);
+                    console.log("unsure letter " + letter + " pos " + (pos + 1));
+                    wordleString += (pos + 1);
                 }
             });
         })
@@ -53,21 +55,17 @@ function Options(props) {
 
     return (
 
-        <div>
-            <div className="options">
-                {currentOptions.totalWords + " " + boardState.settings.wordLength + "-letter words"}
-                <ol>
-                    {[...currentOptions.wordList].slice(0,100).map((item, index) => (
-                        <li className="optionItem" key={item.word} value={index +1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
-                    ))}
-                </ol>
-                <div title="Words that maximize the unused letters, but are not required to use known letters">Fishing words:</div>
-                <ol>
-                    {[...currentOptions.fishingWords].slice(0, 100).map((item, index) => (
-                        <li className="optionItem" key={"fish" + item.word} value={index+1} onClick={() => onSelectWord(item.word.toUpperCase())}>{item.word + " (" + item.freqScore.toFixed(2) + ")"}</li>
-                    ))}
-                </ol>
-            </div>
+        <div className="options">
+            <Tabs id="possible-word-tabs" className="flex-nowrap">
+                <Tab eventKey="viable" title="Viable" tabClassName="viableTab" tabAttrs={{title:"Words suggested based on how common their characters are among all the possible words. Click a word to add it to the board."}}>
+                    <OptionTab wordList={currentOptions.wordList} onSelectWord={onSelectWord}
+                               heading={currentOptions.totalWords + " possible words"}/>
+                </Tab>
+                <Tab eventKey="fishing" title="Fishing" tabClassName="fishingTab" tabAttrs={{title:"Words that maximize the commonly used letters in the possible word set, but de-prioritize known letters."}}>
+                    <OptionTab wordList={currentOptions.fishingWords} onSelectWord={onSelectWord}
+                               heading={"Fishing Words"}/>
+                </Tab>
+            </Tabs>
         </div>
 
     );

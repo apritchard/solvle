@@ -71,11 +71,42 @@ nav h1 {
 
 .options {
   height: 550px;
-  width: 180px;
+  max-width: 250px;
+  min-width: 160px;
+  width: 10%;
   overflow-y:auto;
+  overflow-x:hidden;
   text-align: right;
   font-family: Arial, Helvetica, sans-serif;
+  padding-right: 5px;
 }
+
+.options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.options::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+.options::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(#528d4e, #b49f39);
+}
+
+.options::-webkit-scrollbar-thumb:hover {
+  background-image: linear-gradient(#72ad6e, #d4bf59);
+}
+
+.nav-link {
+  color: #d4bf59;
+  background-color: #121212;
+}
+
+.nav-link.active {
+  color: lightgray !important;
+  background-color: #3a393c !important;
+}
+
 
 .optionItem {
   cursor: pointer;
@@ -203,10 +234,13 @@ nav h1 {
   height: 90%;
   margin-left: 10px;
   margin-top: 10px;
+  background-color: #3a393c;
 }
 
 .header .alertDialog {
   position: absolute;
+  max-width: 450px;
+  width: 100%;
   top: 6%;
   left: 50%;
   transform: translateX(-50%);

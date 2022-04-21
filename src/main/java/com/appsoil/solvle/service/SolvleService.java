@@ -38,7 +38,7 @@ public class SolvleService {
     WordCalculationService wordCalculationService;
 
     private final int MAX_RESULT_LIST_SIZE = 100;
-    private final int FISHING_WORD_SIZE = 10;
+    private final int FISHING_WORD_SIZE = 25;
 
     @Cacheable("validWords")
     public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int numSuggestions) {
@@ -65,7 +65,7 @@ public class SolvleService {
 
         // step 3: calculate the frequency score for each word in the available list.
         Set<WordFrequencyScore> wordFrequencyScores = wordCalculationService
-                .calculateWordleResults(containedWords, characterCounts, containedWords.size(), Math.min(numSuggestions,MAX_RESULT_LIST_SIZE));
+                .calculateWordleResults(containedWords, characterCounts, containedWords.size(), 0, Math.min(numSuggestions,MAX_RESULT_LIST_SIZE));
 
         // step 4: calculate words containing the most letters present, regardless off letter requirements
         Set<WordFrequencyScore> fishingWords = containedWords.size() < 1 ? new HashSet<>() : wordCalculationService

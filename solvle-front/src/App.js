@@ -9,7 +9,7 @@ import Keyboard from "./components/Keyboard";
 import React, {useState, createContext} from "react";
 import Options from "./components/Options";
 import Controls from "./components/Controls";
-import { MdHelp } from 'react-icons/md';
+import {MdHelp} from 'react-icons/md';
 import SolvleAlert from "./components/SolvleAlert";
 
 export const AppContext = createContext();
@@ -92,7 +92,7 @@ function App() {
     }
 
     const removeKnownLetter = (pos, letter) => {
-        if(knownLetters.get(pos) === letter) {
+        if (knownLetters.get(pos) === letter) {
             setKnownLetters(prev => new Map(prev.set(pos, "")));
         }
     }
@@ -124,13 +124,13 @@ function App() {
         let oldLetter = boardState.board[attempt][pos];
 
         //if replacement letter same as old letter, bail
-        if(oldLetter === replacementLetter || oldLetter === '') {
+        if (oldLetter === replacementLetter || oldLetter === '') {
             return;
         }
 
         //if old letter in same position on a different word, make no changes
-        for(let row = 0; row < boardState.currAttempt.attempt; row++) {
-            if(boardState.board[row][pos] === oldLetter) {
+        for (let row = 0; row < boardState.currAttempt.attempt; row++) {
+            if (boardState.board[row][pos] === oldLetter) {
                 console.log("letter " + oldLetter + " found in attempt " + row + ", making no updates");
                 return;
             }
@@ -143,16 +143,16 @@ function App() {
         removeKnownLetter(pos, oldLetter);
 
         //if old letter is anywhere on the board, leave its available status alone
-        for(let row = 0; row < boardState.currAttempt.attempt; row++) {
-            for(let x = 0; x < boardState.settings.wordLength; x++) {
-                if(boardState.board[row][x] === oldLetter) {
+        for (let row = 0; row < boardState.currAttempt.attempt; row++) {
+            for (let x = 0; x < boardState.settings.wordLength; x++) {
+                if (boardState.board[row][x] === oldLetter) {
                     console.log("Letter " + oldLetter + " elsewhere on board, not updating its availability");
                     return;
                 }
             }
         }
 
-        if(!availableLetters.has(oldLetter)) {
+        if (!availableLetters.has(oldLetter)) {
             console.log("Restoring " + oldLetter + " to availability list");
             availableLetters.add(oldLetter);
         }
@@ -179,7 +179,7 @@ function App() {
         if (boardState.currAttempt.letter === 0) {
             return;
         }
-        clearPosition(boardState.currAttempt.attempt, boardState.currAttempt.letter-1);
+        clearPosition(boardState.currAttempt.attempt, boardState.currAttempt.letter - 1);
         const newBoard = [...boardState.board];
         newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter - 1] = "";
         setBoardState(prev => ({
@@ -187,13 +187,13 @@ function App() {
             board: newBoard,
             currAttempt: {
                 attempt: boardState.currAttempt.attempt,
-                letter: boardState.currAttempt.letter -1
+                letter: boardState.currAttempt.letter - 1
             }
         }));
     };
 
     const onSelectLetter = (key) => {
-        if (boardState.currAttempt.letter >= boardState.settings.wordLength ) {
+        if (boardState.currAttempt.letter >= boardState.settings.wordLength) {
             return;
         }
         const newBoard = [...boardState.board];
@@ -203,7 +203,7 @@ function App() {
             board: newBoard,
             currAttempt: {
                 attempt: boardState.currAttempt.attempt,
-                letter: boardState.currAttempt.letter +1
+                letter: boardState.currAttempt.letter + 1
             }
         }));
     };
@@ -211,7 +211,7 @@ function App() {
     const onSelectWord = (word) => {
         console.log("Setting " + word + word.length + " " + boardState.currAttempt.attempt + boardState.currAttempt.letter);
         const newBoard = [...boardState.board];
-        for(let i = 0; i < word.length; i++) {
+        for (let i = 0; i < word.length; i++) {
             clearPosition(boardState.currAttempt.attempt, i, word[i]);
             newBoard[boardState.currAttempt.attempt][i] = word[i];
         }
@@ -226,16 +226,17 @@ function App() {
     }
 
     const helpText = <div><div>Solvle is a tool that helps evaluate potential candidate words based on available letters.
-        One way to use it is to type in words you tried in other puzzle games and mark which letters are known or unavailable.
-        The list of available words on the right will update to reflect which words are left. Words are ranked based
-        on how many of their letters are shared by other words in the set.</div>
+        One way to use it is to type in words you tried in other puzzle games and mark letters as known or unavailable.
+        The list of words on the right will update to reflect which words are still available. Words are ranked based
+        on how many of their letters are shared by other available words.</div>
         <ul>
-        <li>Type letters or tap the on-screen keyboard to enter a word.</li>
-        <li>Click the letters you've entered to mark them gray (unavailable), yellow (required, but wrong position), or green (correct position).</li>
-        <li>Press ENTER to advance the word choice to the next line.</li>
-        <li>Available words appear on the right. You can click them to automatically enter a word on the current line.</li>
-        <li>Numbers under each letter on the keyboard indicate how many of the available words include that letter.</li>
-    </ul></div>
+            <li>Type letters or tap the on-screen keyboard to enter a word.</li>
+            <li>Click the letters you've entered to mark them gray (unavailable), yellow (required, but wrong position), or green (correct position).</li>
+            <li>Press ENTER to advance the word choice to the next line.</li>
+            <li>The top 100 viable words appear on the right. You can click a word to fill in its letters on the current line.</li>
+            <li>Numbers under each letter on the keyboard indicate how many of the available words include that letter.</li>
+            <li>Fishing words help you 'fish' for new letters without trying to reuse existing letters.</li>
+        </ul></div>
 
     return (
         <div className="App">
@@ -248,7 +249,8 @@ function App() {
                                  persistMessage={"?"}
                                  persistVariant={"dark"}/>
                     <div className="helpIcon">
-                        <MdHelp title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
+                        <MdHelp
+                            title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
                     </div>
                 </div>
             </nav>
@@ -277,7 +279,7 @@ function App() {
                 }}
             >
                 <div className="game">
-                    <Controls />
+                    <Controls/>
                     <div className="parent">
                         <Board/>
                         <Options/>
