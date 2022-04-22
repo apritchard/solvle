@@ -20,17 +20,17 @@ function Options(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log("Building WordleString")
+        console.log("Building RestrictionString")
         console.log("Available letters: " + [...availableLetters]);
 
-        let wordleString = "";
+        let restrictionString = "";
 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").filter(letter => availableLetters.has(letter)).forEach(letter => {
-            wordleString += letter;
+            restrictionString += letter;
             knownLetters.forEach((l, pos) => {
                 if (l === letter) {
                     console.log("Known letter " + letter + " pos " + (pos + 1));
-                    wordleString += (pos + 1);
+                    restrictionString += (pos + 1);
                 }
             });
             let hasUnsure = false;
@@ -38,17 +38,17 @@ function Options(props) {
                 if (letters.has(letter)) {
                     if (!hasUnsure) {
                         hasUnsure = true;
-                        wordleString += "!";
+                        restrictionString += "!";
                     }
                     console.log("unsure letter " + letter + " pos " + (pos + 1));
-                    wordleString += (pos + 1);
+                    restrictionString += (pos + 1);
                 }
             });
         })
 
         setLoading(true);
-        console.log("Fetching " + wordleString);
-        fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=" + dictionary)
+        console.log("Fetching " + restrictionString);
+        fetch('/solvle/' + restrictionString + "?wordLength=" + boardState.settings.wordLength + "&wordList=" + dictionary)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);

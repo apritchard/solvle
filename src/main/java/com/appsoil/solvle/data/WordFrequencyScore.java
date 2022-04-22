@@ -1,4 +1,4 @@
-package com.appsoil.solvle.wordler;
+package com.appsoil.solvle.data;
 
 public record WordFrequencyScore(String word, Double freqScore) implements Comparable<WordFrequencyScore> {
     @Override

@@ -1,16 +1,16 @@
 package com.appsoil.solvle.service;
 
-import com.appsoil.solvle.controller.WordleDTO;
-import com.appsoil.solvle.wordler.*;
-import com.appsoil.solvle.wordler.Dictionary;
+import com.appsoil.solvle.controller.SolvleDTO;
+import com.appsoil.solvle.data.Dictionary;
+import com.appsoil.solvle.data.Word;
+import com.appsoil.solvle.data.WordFrequencyScore;
+import com.appsoil.solvle.data.WordRestrictions;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
@@ -18,46 +18,46 @@ import java.util.stream.Collectors;
 @Log4j2
 public class SolvleService {
 
-    @Qualifier("defaultDictionary")
-    @Autowired
-    Dictionary defaultDictionary;
+    private final Dictionary defaultDictionary;
+    private final Dictionary simpleDictionary;
+    private final Dictionary bigDictionary;
+    private final Dictionary hugeDictionary;
 
-    @Qualifier("wordleDictionary")
-    @Autowired
-    Dictionary wordleDictionary;
-
-    @Qualifier("bigDictionary")
-    @Autowired
-    Dictionary bigDictionary;
-
-    @Qualifier("hugeDictionary")
-    @Autowired
-    Dictionary hugeDictionary;
-
-    @Autowired
-    WordCalculationService wordCalculationService;
+    private final WordCalculationService wordCalculationService;
 
     private final int MAX_RESULT_LIST_SIZE = 100;
     private final int FISHING_WORD_SIZE = 25;
 
+    public SolvleService(@Qualifier("defaultDictionary") Dictionary defaultDictionary,
+                         @Qualifier("simpleDictionary") Dictionary simpleDictionary,
+                         @Qualifier("bigDictionary") Dictionary bigDictionary,
+                         @Qualifier("hugeDictionary") Dictionary hugeDictionary,
+                         WordCalculationService wordCalculationService) {
+        this.defaultDictionary = defaultDictionary;
+        this.simpleDictionary = simpleDictionary;
+        this.bigDictionary = bigDictionary;
+        this.hugeDictionary = hugeDictionary;
+        this.wordCalculationService = wordCalculationService;
+    }
+
     @Cacheable("validWords")
-    public WordleDTO getValidWords(String wordleString, int length, String wordleDict, int numSuggestions) {
+    public SolvleDTO getValidWords(String restrictionString, int length, String wordList, int numSuggestions) {
 
         log.debug("Searching for words of length {}", length);
 
         // parse the string to identify required letters and position exclusions
-        WordleInfo wordleInfo = new WordleInfo(wordleString);
+        WordRestrictions wordRestrictions = new WordRestrictions(restrictionString);
 
-        Dictionary dictionary = switch(wordleDict) {
-            case "wordle" -> length == 5 ? wordleDictionary : defaultDictionary;
+        Dictionary dictionary = switch (wordList) {
+            case "simple" -> length == 5 ? simpleDictionary : defaultDictionary;
             case "big" -> bigDictionary;
             case "huge" -> hugeDictionary;
             default -> defaultDictionary;
         };
 
-        // step 1: find all the valid words in our dictionary for this wordle string
-        SortedSet<Word> containedWords = dictionary.getWordsBySize().get(length).parallelStream()
-                .filter(w -> isValidWord(w, wordleInfo))
+        // step 1: find all the valid words in our dictionary for this restriction string
+        SortedSet<Word> containedWords = dictionary.wordsBySize().get(length).parallelStream()
+                .filter(w -> isValidWord(w, wordRestrictions))
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
 
         // step 2: calculate how many words in the valid word set contain each character
@@ -65,44 +65,45 @@ public class SolvleService {
 
         // step 3: calculate the frequency score for each word in the available list.
         Set<WordFrequencyScore> wordFrequencyScores = wordCalculationService
-                .calculateWordleResults(containedWords, characterCounts, containedWords.size(), 0, Math.min(numSuggestions,MAX_RESULT_LIST_SIZE));
+                .calculateViableWords(containedWords, characterCounts, containedWords.size(), 0, Math.min(numSuggestions, MAX_RESULT_LIST_SIZE));
 
         // step 4: calculate words containing the most letters present, regardless off letter requirements
         Set<WordFrequencyScore> fishingWords = containedWords.size() < 1 ? new HashSet<>() : wordCalculationService
-                .calculateFishingWords(dictionary.getWordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordleInfo.getRequiredLetters());
+                .calculateFishingWords(dictionary.wordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordRestrictions.requiredLetters());
 
-        log.info("Found {} length {} matches for {}", containedWords.size(), length, wordleString);
-        return new WordleDTO(wordFrequencyScores, fishingWords, containedWords.size(), characterCounts);
+        log.info("Found {} length {} matches for {}", containedWords.size(), length, restrictionString);
+        return new SolvleDTO(wordFrequencyScores, fishingWords, containedWords.size(), characterCounts);
     }
 
     /**
-     * Returns true if this word could be a valid wordle answer for the provided letters
-     * @param wordleInfo The Word describing available and required wordle letters
+     * Returns true if this word could be a valid word for the provided letters
+     *
+     * @param wordRestrictions The Word describing available and required letters
      * @return
      */
-    public boolean isValidWord(Word word, WordleInfo wordleInfo) {
+    public boolean isValidWord(Word word, WordRestrictions wordRestrictions) {
 
         //if required letters are missing
-        if(!word.getLetters().keySet().containsAll(wordleInfo.getRequiredLetters())) {
+        if (!word.letters().keySet().containsAll(wordRestrictions.requiredLetters())) {
             return false;
         }
 
         //check if any required positions are missing
-        for(Map.Entry<Integer, Character> entry : wordleInfo.getLetterPositions().entrySet()) {
-            if(word.getWord().charAt(entry.getKey() - 1) != entry.getValue()) {
+        for (Map.Entry<Integer, Character> entry : wordRestrictions.letterPositions().entrySet()) {
+            if (word.word().charAt(entry.getKey() - 1) != entry.getValue()) {
                 return false;
             }
         }
 
         //check if any excluded positions are present
-        for(var entry : wordleInfo.getPositionExclusions().entrySet()) {
-            if(entry.getValue().contains(word.getWord().charAt(entry.getKey() -1))) {
+        for (var entry : wordRestrictions.positionExclusions().entrySet()) {
+            if (entry.getValue().contains(word.word().charAt(entry.getKey() - 1))) {
                 return false;
             }
         }
 
-        //then check if all letters in this word are available in the wordleInfo
-        return wordleInfo.getLetters().keySet().containsAll(word.getLetters().keySet());
+        //then check if all letters in this word are available in the restrictions
+        return wordRestrictions.word().letters().keySet().containsAll(word.letters().keySet());
 
     }
 }

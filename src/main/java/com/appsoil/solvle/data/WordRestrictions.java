@@ -1,6 +1,5 @@
-package com.appsoil.solvle.wordler;
+package com.appsoil.solvle.data;
 
-import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
@@ -11,19 +10,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-@Data
 @Log4j2
-public class WordleInfo extends Word {
-    private Set<Character> requiredLetters = new HashSet<>();
-    private Map<Integer, Character> letterPositions = new HashMap<>();
-    private Map<Integer, Set<Character>> positionExclusions = new HashMap<>();
+public record WordRestrictions(Word word, Set<Character> requiredLetters, Map<Integer, Character> letterPositions, Map<Integer, Set<Character>> positionExclusions)  {
 
     //parses a string of letters. Letters may be followed by numbers, an exclamation mark, or both
     // for example abc3d!e!45fg5!2 will be parsed into (a)(b)(c3)(d!)(e!45)(f)(g5!2)
-    Pattern wordleRegex = Pattern.compile("(\\S)(\\d*)(\\!\\d*)*");
+    private static Pattern restrictionsRegex = Pattern.compile("(\\S)(\\d*)(\\!\\d*)*");
+
+    private static int MAX_WORD_LENGTH = 9;
 
     /**
-     * Creates a description of known wordle knowledge based on provided input string.
+     * Creates a description of known restriction knowledge based on provided input string.
      * @param word String containing all available letters from which to guess. If a letter is followed by
      *             numbers, those numbers indicate required positions for the letter. If a letter is followed
      *             by an exclamation (!), that letter is required, but we don't know where. If the ! is followed
@@ -35,12 +32,15 @@ public class WordleInfo extends Word {
      *                  t!12 - required, but NOT in positions 1 or 2
      *                  u3!4 - required in 3, not allowed in 4
      */
-    public WordleInfo(String word) {
-        super(word.replaceAll("[^A-Za-z]", "")); //create a base Word with only alpha
+    public WordRestrictions(String word) {
+        this(new Word(word.replaceAll("[^A-Za-z]", "")),
+                new HashSet<>(MAX_WORD_LENGTH),
+                new HashMap<>(MAX_WORD_LENGTH),
+                new HashMap<>(MAX_WORD_LENGTH));
 
-        log.debug("Parsing wordle characters " + word);
+        log.debug("Parsing restriction characters " + word);
 
-        Matcher matcher = wordleRegex.matcher(word);
+        Matcher matcher = restrictionsRegex.matcher(word);
         while(matcher.find()) {
             char c = matcher.group(1).charAt(0);
             boolean hasPos = matcher.group(2) != null && matcher.group(2) != "";

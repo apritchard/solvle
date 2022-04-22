@@ -61,14 +61,24 @@ function Controls() {
             <Button title="increase the number of guesses allowed" variant="primary" onClick={increaseAttempts}>Add Row</Button>
             <Button title="decrease the number of guesses allowed" variant="secondary" onClick={decreaseAttempts}>Remove Row</Button>
             <Button title="clear all letters from the board" variant="danger" onClick={clickReset}>Reset Board</Button>
-            <div onChange={toggleResetWords}>
+            <div onChange={toggleResetWords} className="wordLists">
                 Word List:
-                <span title="2315 words: https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt Only displays valid 5-letter wordle answers. Will use default dictionary for other word lengths.">
-                    <input defaultChecked={dictionary === "wordle"} type="radio" value="wordle" name="dict" /> Wordle
+                <span title="2315 words: https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt Defaults to match-8 for words that are not 5-letters.">
+                    <input id="simpleRadio" defaultChecked={dictionary === "simple"} type="radio" value="simple" name="dict" />
+                    <label htmlFor="simpleRadio">Simple</label>
                 </span>
-                <span title="108814 words: https://www.keithv.com/software/wlist/ match8 list"><input defaultChecked={dictionary === "default"} type="radio" value="default" name="dict" /> Match-8 </span>
-                <span title="172820 words: https://github.com/dolph/dictionary/blob/master/enable1.txt"><input defaultChecked={dictionary === "big"} type="radio" value="big" name="dict" /> Scrabble </span>
-                <span title="370103 words: https://github.com/dwyl/english-words/blob/master/words_alpha.txt"><input defaultChecked={dictionary === "huge"} type="radio" value="huge" name="dict" /> Huge </span>
+                <span title="108814 words: https://www.keithv.com/software/wlist/">
+                    <input id="defaultRadio" defaultChecked={dictionary === "default"} type="radio" value="default" name="dict" />
+                    <label htmlFor="defaultRadio">Match-8</label>
+                </span>
+                <span title="172820 words: https://github.com/dolph/dictionary/blob/master/enable1.txt">
+                    <input id="bigRadio" defaultChecked={dictionary === "big"} type="radio" value="big" name="dict" />
+                    <label htmlFor="bigRadio">Scrabble</label>
+                </span>
+                <span title="370103 words: https://github.com/dwyl/english-words/blob/master/words_alpha.txt">
+                    <input id="hugeRadio" defaultChecked={dictionary === "huge"} type="radio" value="huge" name="dict" />
+                    <label htmlFor="hugeRadio">Huge</label>
+                </span>
             </div>
         </div>
     );

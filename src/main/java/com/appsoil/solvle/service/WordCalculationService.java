@@ -1,7 +1,7 @@
 package com.appsoil.solvle.service;
 
-import com.appsoil.solvle.wordler.Word;
-import com.appsoil.solvle.wordler.WordFrequencyScore;
+import com.appsoil.solvle.data.Word;
+import com.appsoil.solvle.data.WordFrequencyScore;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -24,7 +24,7 @@ public class WordCalculationService {
     public Map<Character, LongAdder> calculateCharacterCounts(Set<Word> words) {
         Map<Character, LongAdder> counts = new ConcurrentHashMap<>(26);
         words.parallelStream().forEach(word -> {
-            word.getLetters().forEach((key, value) -> {
+            word.letters().forEach((key, value) -> {
                 counts.computeIfAbsent(key, k -> new LongAdder()).increment();
             });
         });
@@ -47,16 +47,16 @@ public class WordCalculationService {
      * @param sizeLimit Maximum number of results to return
      * @return
      */
-    public Set<WordFrequencyScore> calculateWordleResults(Set<Word> words, Map<Character, LongAdder> characterCounts, int viableWordsCount, int requiredCharCount, int sizeLimit) {
+    public Set<WordFrequencyScore> calculateViableWords(Set<Word> words, Map<Character, LongAdder> characterCounts, int viableWordsCount, int requiredCharCount, int sizeLimit) {
         return words.parallelStream()
-                .map(word -> new WordFrequencyScore(word.getWord(), calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount)))
+                .map(word -> new WordFrequencyScore(word.word(), calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
     }
 
     /**
-     * Identical to {@link #calculateWordleResults(Set, Map, int, int, int)} but with the addition of a requiredLetters set.
+     * Identical to {@link #calculateViableWords(Set, Map, int, int, int)} but with the addition of a requiredLetters set.
      * This set refers to letters that are required in viable words, and they will be excluded from the frequency
      * score calculation for fishing words.
      *
@@ -78,14 +78,14 @@ public class WordCalculationService {
                 .filter(entrySet -> !requiredLetters.contains(entrySet.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, ConcurrentHashMap::new));
 
-        return calculateWordleResults(allWords, newMap, viableWordsCount, requiredLetters.size(), sizeLimit);
+        return calculateViableWords(allWords, newMap, viableWordsCount, requiredLetters.size(), sizeLimit);
     }
 
     protected Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, int totalWords, int maxScore) {
         if(totalWords < 1 || maxScore < 1) {
             return 0.0;
         }
-        return word.getLetters().entrySet().stream()
+        return word.letters().entrySet().stream()
                 .mapToDouble(c ->
                         (wordsWithCharacter.containsKey(c.getKey()) ? wordsWithCharacter.get(c.getKey()).doubleValue() : 0) /
                                 ((double)totalWords * maxScore))

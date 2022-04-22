@@ -1,11 +1,10 @@
 package com.appsoil.solvle.service;
 
 import com.appsoil.solvle.controller.SolvleController;
-import com.appsoil.solvle.wordler.Dictionary;
+import com.appsoil.solvle.data.Dictionary;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.format.ResultFormatType;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -40,7 +39,7 @@ public class SolveServicePerformanceTest {
     private static Map<Character, LongAdder> fullDictionarycharacters;
 
     private static final Random random = new Random();
-    private List<String> wordleStrings = new ArrayList<>();
+    private List<String> restrictionStrings = new ArrayList<>();
 
     @Test
     public void executeJmhRunner() throws RunnerException {
@@ -48,7 +47,7 @@ public class SolveServicePerformanceTest {
         controller = solvleController;
         staticWordService = wordCalculationService;
         dictionary = defaultDictionary;
-        fullDictionarycharacters = staticWordService.calculateCharacterCounts(dictionary.getWordsBySize().get(5));
+        fullDictionarycharacters = staticWordService.calculateCharacterCounts(dictionary.wordsBySize().get(5));
 
         Options jmhRunnerOptions = new OptionsBuilder()
                 // set the class name regex for benchmarks to search for to the current class
@@ -69,16 +68,16 @@ public class SolveServicePerformanceTest {
     }
 
     @Setup
-    public void setupWordleStrings() {
-        wordleStrings = new ArrayList<>();
+    public void setupRestrictionStrings() {
+        restrictionStrings = new ArrayList<>();
         for(int i = 0; i < 100; i++) {
             for(int j = 0; j < 10; j++) {
-                wordleStrings.add(generateRandomWordleString(j, 1,1));
+                restrictionStrings.add(generateRandomRestrictionString(j, 1,1));
             }
         }
     }
 
-    private static String generateRandomWordleString(int numUnavailableLetters, int numRequiredLetters, int numUnsureLetters) {
+    private static String generateRandomRestrictionString(int numUnavailableLetters, int numRequiredLetters, int numUnsureLetters) {
         String allLetters = "abcdefghijklmnopqrstuvwxyz";
         int charLoc = 0;
         String charToModify = "";
@@ -104,54 +103,54 @@ public class SolveServicePerformanceTest {
     @BenchmarkMode(Mode.AverageTime)
     public void someBenchmarkMethod() {
         //  note - this test is useless with cacheing on - @todo create test profile or something to disable cacheing for performance test
-        wordleStrings.forEach(s -> controller.getValidWords(s, 5, "default", 100));
+        restrictionStrings.forEach(s -> controller.getValidWords(s, 5, "default", 100));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkCharacterCounts() {
-        staticWordService.calculateCharacterCounts(dictionary.getWordsBySize().get(5));
+        staticWordService.calculateCharacterCounts(dictionary.wordsBySize().get(5));
     }
 //
 //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    public void benchmarkCharacterCountsSingleThread() {
-//        staticWordService.calculateCharacterCountsSingleThread(dictionary.getWordsBySize().get(5));
+//        staticWordService.calculateCharacterCountsSingleThread(dictionary.wordsBySize().get(5));
 //    }
 //
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void benchmarkWordleResults() {
-        staticWordService.calculateWordleResults(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 0, 100 );
+    public void benchmarkRestrictionResults() {
+        staticWordService.calculateViableWords(dictionary.wordsBySize().get(5), fullDictionarycharacters, dictionary.wordsBySize().get(5).size(), 0, 100 );
     }
 
 //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
-//    public void benchmarkWordleResultsSingleThread() {
-//        staticWordService.calculateWordleResultsSingleThread(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 100 );
+//    public void benchmarkRestrictionResultsSingleThread() {
+//        staticWordService.calculateRestrictionResultsSingleThread(dictionary.wordsBySize().get(5), fullDictionarycharacters, dictionary.wordsBySize().get(5).size(), 100 );
 //    }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkFishingWords() {
-        staticWordService.calculateFishingWords(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 100, Set.of('i') );
+        staticWordService.calculateFishingWords(dictionary.wordsBySize().get(5), fullDictionarycharacters, dictionary.wordsBySize().get(5).size(), 100, Set.of('i') );
     }
 
 //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    public void benchmarkFishingWordsMultiThread() {
-//        staticWordService.calculateFishingWordsMultiThread(dictionary.getWordsBySize().get(5), fullDictionarycharacters, dictionary.getWordsBySize().get(5).size(), 100 , Set.of('i'));
+//        staticWordService.calculateFishingWordsMultiThread(dictionary.wordsBySize().get(5), fullDictionarycharacters, dictionary.wordsBySize().get(5).size(), 100 , Set.of('i'));
 //    }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkFreqScore() {
-        dictionary.getWordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScore(word, fullDictionarycharacters, 0, dictionary.getWordsBySize().get(5).size()));
+        dictionary.wordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScore(word, fullDictionarycharacters, 0, dictionary.wordsBySize().get(5).size()));
     }
 //
 //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    public void benchmarkFreqScoreMultiThread() {
-//        dictionary.getWordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScoreMultiThread(word, fullDictionarycharacters, (double)dictionary.getWordsBySize().get(5).size()));
+//        dictionary.wordsBySize().get(5).forEach(word -> staticWordService.calculateFreqScoreMultiThread(word, fullDictionarycharacters, (double)dictionary.wordsBySize().get(5).size()));
 //    }
 }

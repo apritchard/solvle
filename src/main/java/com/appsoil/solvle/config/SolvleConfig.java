@@ -1,7 +1,7 @@
 package com.appsoil.solvle.config;
 
-import com.appsoil.solvle.wordler.Dictionary;
-import com.appsoil.solvle.wordler.Word;
+import com.appsoil.solvle.data.Dictionary;
+import com.appsoil.solvle.data.Word;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,24 +19,24 @@ import java.util.Set;
 @Log4j2
 public class SolvleConfig {
 
-    @Bean(name="defaultDictionary")
+    @Bean(name = "defaultDictionary")
     Dictionary getDictionary() {
         return readResourceToDictionary("/dict2/wlist_match8.txt");
     }
 
-    @Bean(name="bigDictionary")
+    @Bean(name = "bigDictionary")
     Dictionary getBigDictionary() {
         return readResourceToDictionary("/dict2/enable1.txt");
     }
 
-    @Bean(name="hugeDictionary")
+    @Bean(name = "hugeDictionary")
     Dictionary getHugeDictionary() {
         return readResourceToDictionary("/dict2/big-dict-energy.txt");
     }
 
-    @Bean(name="wordleDictionary")
-    Dictionary getWordleDictionary() {
-        return readResourceToDictionary("/dict2/wordle-solutions.txt");
+    @Bean(name = "simpleDictionary")
+    Dictionary getSimpleDictionary() {
+        return readResourceToDictionary("/dict2/simple-solutions.txt");
     }
 
     private Dictionary readResourceToDictionary(String path) {
@@ -48,7 +48,7 @@ public class SolvleConfig {
         try {
             String word = br.readLine();
             while (word != null) {
-                if(!dict.containsKey(word.length())) {
+                if (!dict.containsKey(word.length())) {
                     dict.put(word.length(), new HashSet<>());
                 }
                 dict.get(word.length()).add(new Word(word));

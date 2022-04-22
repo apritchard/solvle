@@ -1,11 +1,10 @@
 package com.appsoil.solvle.service;
 
-import com.appsoil.solvle.controller.WordleDTO;
-import com.appsoil.solvle.wordler.Dictionary;
-import com.appsoil.solvle.wordler.Word;
-import com.appsoil.solvle.wordler.WordFrequencyScore;
+import com.appsoil.solvle.controller.SolvleDTO;
+import com.appsoil.solvle.data.Dictionary;
+import com.appsoil.solvle.data.Word;
+import com.appsoil.solvle.data.WordFrequencyScore;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class SolvleServiceTest {
             return dictionary;
         }
 
-        @Bean(name={"wordleDictionary", "bigDictionary", "hugeDictionary"})
+        @Bean(name={"simpleDictionary", "bigDictionary", "hugeDictionary"})
         Dictionary getOtherDictionary() {
             return new Dictionary(Map.of(5, Set.of(new Word("foo"))));
         }
@@ -47,9 +46,9 @@ public class SolvleServiceTest {
             "abcd | aaaaa,aaaab,aaabc,aabcd",
             "abcde | aaaaa,aaaab,aaabc,aabcd,abcde,bcdea"
     }, delimiter = '|')
-    void getValidWords_lettersAvailable_matchesWords(String wordleString, String matches) {
+    void getValidWords_lettersAvailable_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).collect(Collectors.toSet());
-        WordleDTO result = solvleService.getValidWords(wordleString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -64,9 +63,9 @@ public class SolvleServiceTest {
             "a1b2c3d4e5 | abcde",
             "a1b3c2de | none "
     }, delimiter = '|')
-    void getValidWords_requiredPosition_matchesWords(String wordleString, String matches) {
+    void getValidWords_requiredPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        WordleDTO result = solvleService.getValidWords(wordleString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -80,9 +79,9 @@ public class SolvleServiceTest {
             "a!5b | aaaab",
             "a!15bcde | none"
     }, delimiter = '|')
-    void getValidWords_excludedPosition_matchesWords(String wordleString, String matches) {
+    void getValidWords_excludedPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        WordleDTO result = solvleService.getValidWords(wordleString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -97,9 +96,9 @@ public class SolvleServiceTest {
             "a1!3b3cde | aabcd",
             "a1!2b3cde | none"
     }, delimiter = '|')
-    void getValidWords_excludeAndRequired_matchesWords(String wordleString, String matches) {
+    void getValidWords_excludeAndRequired_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        WordleDTO result = solvleService.getValidWords(wordleString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }

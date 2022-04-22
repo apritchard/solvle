@@ -1,7 +1,7 @@
 package com.appsoil.solvle.service;
 
-import com.appsoil.solvle.wordler.Word;
-import com.appsoil.solvle.wordler.WordFrequencyScore;
+import com.appsoil.solvle.data.Word;
+import com.appsoil.solvle.data.WordFrequencyScore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,11 +44,11 @@ public class WordCalculationServiceTest {
             "abcde, abcdd, 0.8",
             "abcde, aaaaa, 0.2",
             "abcde, fghij, 0.0"})
-    void calculateWordleResults_singleSourceAndWord_returnsNumberOfSourceCharacters(String sourceWord, String viableWord, double score) {
+    void calculateViableResults_singleSourceAndWord_returnsNumberOfSourceCharacters(String sourceWord, String viableWord, double score) {
         Map<Character, LongAdder> counts = wordCalculationService.calculateCharacterCounts(Set.of(new Word(sourceWord)));
         Set<Word> viableWords = Set.of(new Word(viableWord));
 
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateWordleResults(viableWords, counts, 1, 0, 100);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateViableWords(viableWords, counts, 1, 0, 100);
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
     }

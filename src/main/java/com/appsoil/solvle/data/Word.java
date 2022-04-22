@@ -1,21 +1,13 @@
-package com.appsoil.solvle.wordler;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package com.appsoil.solvle.data;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-@Data
-@NoArgsConstructor
-public class Word implements Serializable, Comparable<Word> {
-
-    private String word;
-    private Map<Character, Integer> letters = new HashMap<>();
+public record Word(String word, Map<Character, Integer> letters) implements Serializable, Comparable<Word> {
 
     public Word(String word){
-        this.word = word;
+        this(word, new HashMap<>());
         for(Character c : word.toCharArray()){
             if(letters.containsKey(c)){
                 letters.put(c, letters.get(c) + 1);
