@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {AppContext} from "../App";
 import OptionTab from "./OptionTab";
-import {Tab, Tabs} from "react-bootstrap";
+import {Spinner, Tab, Tabs} from "react-bootstrap";
 
 function Options(props) {
 
@@ -16,6 +16,8 @@ function Options(props) {
         dictionary
     } =
         useContext(AppContext);
+
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         console.log("Building WordleString")
@@ -44,12 +46,14 @@ function Options(props) {
             });
         })
 
+        setLoading(true);
         console.log("Fetching " + wordleString);
         fetch('/solvle/' + wordleString + "?wordLength=" + boardState.settings.wordLength + "&wordleDict=" + dictionary)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);
                 setCurrentOptions(data);
+                setLoading(false);
             });
     }, [setCurrentOptions, boardState.settings.wordLength, availableLetters, knownLetters, unsureLetters, dictionary]);
 
@@ -58,12 +62,14 @@ function Options(props) {
         <div className="options">
             <Tabs id="possible-word-tabs" className="flex-nowrap">
                 <Tab eventKey="viable" title="Viable" tabClassName="viableTab" tabAttrs={{title:"Words suggested based on how common their characters are among all the possible words. Click a word to add it to the board."}}>
-                    <OptionTab wordList={currentOptions.wordList} onSelectWord={onSelectWord}
-                               heading={currentOptions.totalWords + " possible words"}/>
+                    {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
+                    {!loading && <OptionTab wordList={currentOptions.wordList} onSelectWord={onSelectWord}
+                               heading={currentOptions.totalWords + " possible words"}/> }
                 </Tab>
                 <Tab eventKey="fishing" title="Fishing" tabClassName="fishingTab" tabAttrs={{title:"Words that maximize the commonly used letters in the possible word set, but de-prioritize known letters."}}>
-                    <OptionTab wordList={currentOptions.fishingWords} onSelectWord={onSelectWord}
-                               heading={"Fishing Words"}/>
+                    {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
+                    {!loading && <OptionTab wordList={currentOptions.fishingWords} onSelectWord={onSelectWord}
+                               heading={"Fishing Words"}/> }
                 </Tab>
             </Tabs>
         </div>
