@@ -40,6 +40,7 @@ public class SolvleController {
         if (requestsSinceLoading++ % 1000 == 0 || MINUTES.between(lastRequestLogTime, now) > 29) {
             double requestPerHour = (double) requestsSinceLoading * 60 / (double) MINUTES.between(startTime, now);
             log.info("{} requests made since {} ({} per hour)", requestsSinceLoading, lastRequestLogTime, requestPerHour);
+            lastRequestLogTime = now;
         }
     }
 }
