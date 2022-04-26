@@ -56,20 +56,18 @@ function Controls() {
 
     return (
         <div className="controls">
-            <Button title="increase the maximum word length" variant="primary" onClick={increaseWordLength}>Add Letter</Button>
-            <Button title="decrease the maximum word length" variant="secondary" onClick={decreaseWordLength}>Remove Letter</Button>
-            <Button title="increase the number of guesses allowed" variant="primary" onClick={increaseAttempts}>Add Row</Button>
-            <Button title="decrease the number of guesses allowed" variant="secondary" onClick={decreaseAttempts}>Remove Row</Button>
+            <div className="flex-nowrap">
+            <Button title="increase the maximum word length" variant="primary" onClick={increaseWordLength}>Letter +</Button>
+            <Button title="decrease the maximum word length" variant="secondary" onClick={decreaseWordLength}>Letter -</Button>
+            <Button title="increase the number of guesses allowed" variant="primary" onClick={increaseAttempts}>Row +</Button>
+            <Button title="decrease the number of guesses allowed" variant="secondary" onClick={decreaseAttempts}>Row -</Button>
             <Button title="clear all letters from the board" variant="danger" onClick={clickReset}>Reset Board</Button>
+            </div>
             <div onChange={toggleResetWords} className="wordLists">
                 Word List:
-                <span title="2315 words: https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt Defaults to match-8 for words that are not 5-letters.">
+                <span title="2315 words: https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt Defaults to Scrabble for words that are not 5-letters.">
                     <input id="simpleRadio" defaultChecked={dictionary === "simple"} type="radio" value="simple" name="dict" />
                     <label htmlFor="simpleRadio">Simple</label>
-                </span>
-                <span title="108814 words: https://www.keithv.com/software/wlist/">
-                    <input id="defaultRadio" defaultChecked={dictionary === "default"} type="radio" value="default" name="dict" />
-                    <label htmlFor="defaultRadio">Match-8</label>
                 </span>
                 <span title="172820 words: https://github.com/dolph/dictionary/blob/master/enable1.txt">
                     <input id="bigRadio" defaultChecked={dictionary === "big"} type="radio" value="big" name="dict" />

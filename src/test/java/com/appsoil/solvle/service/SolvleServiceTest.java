@@ -23,14 +23,14 @@ public class SolvleServiceTest {
 
     @TestConfiguration
     public static class SolvleTestConfiguration {
-        @Bean(name="defaultDictionary")
+        @Bean(name="simpleDictionary")
         Dictionary getTestDictionary() {
             Set<Word> words = Stream.of("aaaaa", "aaaab", "aaabc", "aabcd", "abcde", "bcdea").map(Word::new).collect(Collectors.toSet());
             Dictionary dictionary = new Dictionary(Map.of(5, words));
             return dictionary;
         }
 
-        @Bean(name={"simpleDictionary", "bigDictionary", "hugeDictionary"})
+        @Bean(name={"bigDictionary", "hugeDictionary"})
         Dictionary getOtherDictionary() {
             return new Dictionary(Map.of(5, Set.of(new Word("foo"))));
         }
@@ -48,7 +48,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_lettersAvailable_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -65,7 +65,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_requiredPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -81,7 +81,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_excludedPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -98,7 +98,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_excludeAndRequired_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "default", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }

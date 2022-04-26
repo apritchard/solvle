@@ -38,10 +38,10 @@ information gained.
 There are currently 4 dictionaries supported by this application.
 1. The Wordle Solutions list. It contains 2315 words. I pulled this particular set of words from
 https://github.com/techtribeyt/Wordle/blob/main/wordle_answers.txt
-2. The Match-8 wordlist, which contains 108814 words found in at least 8 of the word corpus files
+2. (deprecated) The Match-8 wordlist, which contains 108814 words found in at least 8 of the word corpus files
 aggregated here: https://www.keithv.com/software/wlist/
 3. The Official Scrabble Player's Dictionary, containing 172819 words found here: 172820 words: https://github.com/dolph/dictionary/
 4. The InfoChimps 370103 words dataset, found in text here: https://github.com/dwyl/english-words/
 
-The match-8 was chosen as 'default' because of its size, though the scrabble player dictionary tends to have
-more 'normal' words and fewer esoteric words or proper nouns.
+The simple wordle solutions list is the default dictionary, but the scrabble dictionary is used as the
+medium size choice because it contains more normal word list than the match-8.

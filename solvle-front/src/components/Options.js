@@ -60,7 +60,7 @@ function Options(props) {
     return (
 
         <div className="options">
-            <Tabs id="possible-word-tabs" className="flex-nowrap">
+            <Tabs id="possible-word-tabs" className="flex-nowrap tabList">
                 <Tab eventKey="viable" title="Viable" tabClassName="viableTab" tabAttrs={{title:"Words suggested based on how common their characters are among all the possible words. Click a word to add it to the board."}}>
                     {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
                     {!loading && <OptionTab wordList={currentOptions.wordList} onSelectWord={onSelectWord}

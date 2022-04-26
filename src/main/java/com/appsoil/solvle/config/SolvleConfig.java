@@ -19,11 +19,6 @@ import java.util.Set;
 @Log4j2
 public class SolvleConfig {
 
-    @Bean(name = "defaultDictionary")
-    Dictionary getDictionary() {
-        return readResourceToDictionary("/dict2/wlist_match8.txt");
-    }
-
     @Bean(name = "bigDictionary")
     Dictionary getBigDictionary() {
         return readResourceToDictionary("/dict2/enable1.txt");

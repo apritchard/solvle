@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Log4j2
 public class SolvleService {
 
-    private final Dictionary defaultDictionary;
     private final Dictionary simpleDictionary;
     private final Dictionary bigDictionary;
     private final Dictionary hugeDictionary;
@@ -28,12 +27,10 @@ public class SolvleService {
     private final int MAX_RESULT_LIST_SIZE = 100;
     private final int FISHING_WORD_SIZE = 25;
 
-    public SolvleService(@Qualifier("defaultDictionary") Dictionary defaultDictionary,
-                         @Qualifier("simpleDictionary") Dictionary simpleDictionary,
+    public SolvleService(@Qualifier("simpleDictionary") Dictionary simpleDictionary,
                          @Qualifier("bigDictionary") Dictionary bigDictionary,
                          @Qualifier("hugeDictionary") Dictionary hugeDictionary,
                          WordCalculationService wordCalculationService) {
-        this.defaultDictionary = defaultDictionary;
         this.simpleDictionary = simpleDictionary;
         this.bigDictionary = bigDictionary;
         this.hugeDictionary = hugeDictionary;
@@ -49,10 +46,10 @@ public class SolvleService {
         WordRestrictions wordRestrictions = new WordRestrictions(restrictionString);
 
         Dictionary dictionary = switch (wordList) {
-            case "simple" -> length == 5 ? simpleDictionary : defaultDictionary;
+            case "simple" -> length == 5 ? simpleDictionary : bigDictionary;
             case "big" -> bigDictionary;
             case "huge" -> hugeDictionary;
-            default -> defaultDictionary;
+            default -> bigDictionary;
         };
 
         // step 1: find all the valid words in our dictionary for this restriction string
