@@ -47,7 +47,12 @@ public class SolvleService {
 
         Dictionary dictionary = switch (wordList) {
             case "simple" -> length == 5 ? simpleDictionary : bigDictionary;
-            case "big" -> bigDictionary;
+            case "huge" -> hugeDictionary;
+            default -> bigDictionary;
+        };
+
+        // use the big dictionary for fishing simple words, because answers are not required to be valid
+        Dictionary fishingWordDictionary = switch(wordList) {
             case "huge" -> hugeDictionary;
             default -> bigDictionary;
         };
@@ -66,7 +71,7 @@ public class SolvleService {
 
         // step 4: calculate words containing the most letters present, regardless off letter requirements
         Set<WordFrequencyScore> fishingWords = containedWords.size() < 1 ? new HashSet<>() : wordCalculationService
-                .calculateFishingWords(dictionary.wordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordRestrictions.requiredLetters());
+                .calculateFishingWords(fishingWordDictionary.wordsBySize().get(length), characterCounts, containedWords.size(), FISHING_WORD_SIZE, wordRestrictions.requiredLetters());
 
         log.info("Found {} length {} matches for {}", containedWords.size(), length, restrictionString);
         return new SolvleDTO(wordFrequencyScores, fishingWords, containedWords.size(), characterCounts);

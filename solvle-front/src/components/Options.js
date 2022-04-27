@@ -66,7 +66,7 @@ function Options(props) {
                     {!loading && <OptionTab wordList={currentOptions.wordList} onSelectWord={onSelectWord}
                                heading={currentOptions.totalWords + " possible words"}/> }
                 </Tab>
-                <Tab eventKey="fishing" title="Fishing" tabClassName="fishingTab" tabAttrs={{title:"Words that maximize the commonly used letters in the possible word set, but de-prioritize known letters."}}>
+                <Tab eventKey="fishing" title="Fishing" tabClassName="fishingTab" tabAttrs={{title:"Words that maximize revealing new letters based on their frequency in the viable word set. Includes non-viable solutions."}}>
                     {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
                     {!loading && <OptionTab wordList={currentOptions.fishingWords} onSelectWord={onSelectWord}
                                heading={"Fishing Words"}/> }
