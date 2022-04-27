@@ -13,6 +13,9 @@ function Letter({letterPos, attemptVal}) {
     const available = availableLetters.has(letter);
     const unsure = unsureLetters.get(letterPos).has(letter);
     const known = letter !== "" && knownLetters.get(letterPos) === letter;
+    // console.log("Assessing " + attemptVal + "/" + letterPos + " boardState:" + boardState.currAttempt.attempt + "/" + boardState.currAttempt.letter);
+    let highlight = boardState.currAttempt.attempt === attemptVal && boardState.currAttempt.letter === letterPos;
+    // console.log("Highlight = " + highlight);
 
     let letterState = "error";
     if (known) {
@@ -64,7 +67,7 @@ function Letter({letterPos, attemptVal}) {
     }
 
     return (
-        <div className="letter" id={letterState} onClick={toggleState}>
+        <div className={"letter" + (letterState ? " " + letterState : "") + (highlight ? " highlightLetter" : "")} onClick={toggleState}>
             {letter}
         </div>
     );

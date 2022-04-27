@@ -159,20 +159,24 @@ nav h1 {
   border-top: 2px solid #b49f39;
 }
 
-#correct {
+.correct {
   background-color: #528d4e;
 }
 
-#almost {
+.almost {
   background-color: #b49f39;
 }
 
-#error {
+.error {
   background-color: #3a393c;
 }
 
-#huh {
+.huh {
   background-color: orange;
+}
+
+.highlightLetter {
+  border: 2px solid #d4bf59;
 }
 
 .keyboardLine {

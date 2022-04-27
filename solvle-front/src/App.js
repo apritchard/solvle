@@ -176,7 +176,20 @@ function App() {
     };
 
     const onDelete = () => {
+        if (boardState.currAttempt.attempt === 0 && boardState.currAttempt.letter === 0) {
+            console.log("At top of board, cannot delete");
+            return;
+        }
         if (boardState.currAttempt.letter === 0) {
+            console.log("Returning to previous line");
+            setBoardState( prev => ({
+                ...prev,
+                board: prev.board,
+                currAttempt: {
+                    attempt: boardState.currAttempt.attempt - 1,
+                    letter: boardState.settings.wordLength
+                }
+            }));
             return;
         }
         clearPosition(boardState.currAttempt.attempt, boardState.currAttempt.letter - 1);
@@ -193,17 +206,15 @@ function App() {
     };
 
     const onSelectLetter = (key) => {
-        if (boardState.currAttempt.letter >= boardState.settings.wordLength) {
-            return;
-        }
         const newBoard = [...boardState.board];
         newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter] = key;
+        let newLetter = Math.min(boardState.currAttempt.letter + 1, boardState.settings.wordLength);
         setBoardState(prev => ({
             ...prev,
             board: newBoard,
             currAttempt: {
                 attempt: boardState.currAttempt.attempt,
-                letter: boardState.currAttempt.letter + 1
+                letter: newLetter
             }
         }));
     };
@@ -219,8 +230,8 @@ function App() {
             ...prev,
             board: newBoard,
             currAttempt: {
-                attempt: boardState.currAttempt.attempt,
-                letter: word.length
+                attempt: Math.min(boardState.currAttempt.attempt + 1, boardState.settings.attempts-1),
+                letter: 0
             }
         }));
     }
