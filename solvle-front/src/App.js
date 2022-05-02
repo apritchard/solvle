@@ -68,6 +68,7 @@ function App() {
         return {
             wordList: new Set(),
             fishingWords: new Set(),
+            bestWords: new Set(),
             wordsWithCharacter: new Map(),
             totalWords: 0
         }

@@ -4,6 +4,10 @@ import com.appsoil.solvle.controller.SolvleDTO;
 import com.appsoil.solvle.data.Dictionary;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
+import com.appsoil.solvle.data.WordRestrictions;
+import com.appsoil.solvle.service.solvers.FishingSolver;
+import com.appsoil.solvle.service.solvers.Solver;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -13,30 +17,37 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SpringBootTest(classes={SolvleService.class, SolvleServiceTest.SolvleTestConfiguration.class, WordCalculationService.class})
+@SpringBootTest(classes = {SolvleService.class, SolvleServiceTest.SolvleTestConfiguration.class})
 public class SolvleServiceTest {
 
     @TestConfiguration
     public static class SolvleTestConfiguration {
-        @Bean(name="simpleDictionary")
+        @Bean(name = {"simpleDictionary", "bigDictionary", "hugeDictionary"})
         Dictionary getTestDictionary() {
             Set<Word> words = Stream.of("aaaaa", "aaaab", "aaabc", "aabcd", "abcde", "bcdea").map(Word::new).collect(Collectors.toSet());
             Dictionary dictionary = new Dictionary(Map.of(5, words));
             return dictionary;
         }
 
-        @Bean(name={"bigDictionary", "hugeDictionary"})
-        Dictionary getOtherDictionary() {
-            return new Dictionary(Map.of(5, Set.of(new Word("foo"))));
-        }
     }
 
-    @Autowired SolvleService solvleService;
+    @Autowired
+    SolvleService solvleService;
+
+    Solver fishingSolver;
+
+    WordCalculationConfig config = WordCalculationConfig.getOptimalMeanConfig();
+
+    @PostConstruct
+    void postConstruct() {
+        fishingSolver = new FishingSolver(solvleService);
+    }
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -48,7 +59,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_lettersAvailable_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", config);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -65,7 +76,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_requiredPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", config);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -81,7 +92,7 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_excludedPosition_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", config);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
     }
@@ -98,9 +109,94 @@ public class SolvleServiceTest {
     }, delimiter = '|')
     void getValidWords_excludeAndRequired_matchesWords(String restrictionString, String matches) {
         Set<String> expectedWords = Arrays.stream(matches.split(",")).filter(s -> !s.equals("none")).collect(Collectors.toSet());
-        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", 100);
+        SolvleDTO result = solvleService.getValidWords(restrictionString, 5, "simple", config);
 
         Assertions.assertEquals(expectedWords, result.wordList().stream().map(WordFrequencyScore::word).collect(Collectors.toSet()));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "abcde | fghij | abcdeklmnopqrstuvwxyz",
+            "abcde | abcdf | abcdeghijklmnopqrstuvwxyz",
+            "abcde | abcde | abcdefghijklmnopqrstuvwxyz",
+    }, delimiter = '|')
+    void generateRestrictionsFromGuess_lettersDontMatch_restrictsLetters(String solution, String guess, String output) {
+        WordRestrictions restrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+
+        Word s = new Word(solution);
+        Word g = new Word(guess);
+
+        WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(s, g, restrictions);
+
+        Assertions.assertEquals(output, newRestrictions.word().word());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "abcde | fghij | 0",
+            "abcde | abcdf | 4",
+            "abcde | abcde | 5",
+    }, delimiter = '|')
+    void generateRestrictionsFromGuess_matchLetters_requiredLetters(String solution, String guess, int numRequired) {
+        WordRestrictions restrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+
+        Word s = new Word(solution);
+        Word g = new Word(guess);
+
+        WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(s, g, restrictions);
+
+        Assertions.assertEquals(numRequired, newRestrictions.requiredLetters().size());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "abcde | fghij | 0",
+            "abcde | abcdf | 4",
+            "abcde | fabcd | 0",
+            "abcde | abcde | 5",
+            "abcde | abced | 3",
+    }, delimiter = '|')
+    void generateRestrictionsFromGuess_matchPositions_addKnownLetters(String solution, String guess, int knownPositions) {
+        WordRestrictions restrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+
+        Word s = new Word(solution);
+        Word g = new Word(guess);
+
+        WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(s, g, restrictions);
+
+        Assertions.assertEquals(knownPositions, newRestrictions.letterPositions().keySet().size());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "abcde | fghij | 0",
+            "abcde | abcdf | 0",
+            "abcde | fabcd | 4",
+            "abcde | abcde | 0",
+            "abcde | abced | 2",
+    }, delimiter = '|')
+    void generateRestrictionsFromGuess_excludePositions_addExcludedLetters(String solution, String guess, int excludedPositions) {
+        WordRestrictions restrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+
+        Word s = new Word(solution);
+        Word g = new Word(guess);
+
+        WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(s, g, restrictions);
+
+        Assertions.assertEquals(excludedPositions, newRestrictions.positionExclusions().keySet().size());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "abcde | abcde",
+            "aaaab | abcde,aaaab",
+            "bcdea | abcde,bcdea",
+    }, delimiter = '|')
+    void solveWord_wordIsTopChoice_solves(String solution, String expectedResultString) {
+        List<String> results = solvleService.solveWord(new Word(solution));
+        List<String> expectedResults = Arrays.stream(expectedResultString.split(",")).toList();
+
+        Assertions.assertEquals(expectedResults, results);
     }
 
 }

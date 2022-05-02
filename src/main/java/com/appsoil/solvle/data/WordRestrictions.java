@@ -1,6 +1,7 @@
 package com.appsoil.solvle.data;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.SerializationUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +12,10 @@ import java.util.regex.Pattern;
 
 
 @Log4j2
-public record WordRestrictions(Word word, Set<Character> requiredLetters, Map<Integer, Character> letterPositions, Map<Integer, Set<Character>> positionExclusions)  {
+public record WordRestrictions(Word word,
+                               Set<Character> requiredLetters,
+                               Map<Integer, Character> letterPositions,
+                               Map<Integer, Set<Character>> positionExclusions)  {
 
     //parses a string of letters. Letters may be followed by numbers, an exclamation mark, or both
     // for example abc3d!e!45fg5!2 will be parsed into (a)(b)(c3)(d!)(e!45)(f)(g5!2)
@@ -65,5 +69,39 @@ public record WordRestrictions(Word word, Set<Character> requiredLetters, Map<In
             }
         }
 
+    }
+
+    public static WordRestrictions noRestrictions() {
+        return new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+    }
+
+    public static WordRestrictions generateRestrictions(Word solution, Word guess, WordRestrictions currentRestrictions) {
+
+        String restrictionWord = currentRestrictions.word().word();
+        Set<Character> newRequiredLetters = new HashSet<>(currentRestrictions.requiredLetters());
+        Map<Integer, Character> newLetterPositions = SerializationUtils.clone(new HashMap<>(currentRestrictions.letterPositions()));
+        Map<Integer, Set<Character>> newPositionExclusions = SerializationUtils.clone(new HashMap<>(currentRestrictions.positionExclusions()));
+
+        for(int i = 0; i < guess.getLength(); i++) {
+            char c = guess.word().charAt(i);
+
+            //if solution contains this letter, add it to required, otherwise remove it from the available chars
+            if(solution.letters().containsKey(c)) {
+                newRequiredLetters.add(c);
+            } else {
+                restrictionWord = restrictionWord.replace("" + c, "");
+                continue;
+            }
+
+            // if the letter is in the correct spot, put it in solutions, otherwise, exclude this position
+            if(c == solution.word().charAt(i)) {
+                newLetterPositions.put(i + 1, c);
+            } else {
+                newPositionExclusions.putIfAbsent(i + 1, new HashSet<>());
+                newPositionExclusions.get(i + 1).add(c);
+            }
+        }
+
+        return new WordRestrictions(new Word(restrictionWord), newRequiredLetters, newLetterPositions, newPositionExclusions);
     }
 }

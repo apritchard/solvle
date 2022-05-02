@@ -2,24 +2,22 @@ package com.appsoil.solvle.service;
 
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
+import com.appsoil.solvle.data.WordRestrictions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SpringBootTest(classes={WordCalculationService.class})
 public class WordCalculationServiceTest {
 
-    @Autowired
-    WordCalculationService wordCalculationService;
+    WordCalculationService wordCalculationService = new WordCalculationService(WordCalculationConfig.getOptimalMeanConfig());
 
     private final Set<Word> ALL_LETTERS_WORD_SET = Stream.of("how", "quickly", "daft", "jumping", "zebras", "vex").map(Word::new).collect(Collectors.toSet());
     private final Set<Character> CHARACTERS_IN_TWO_WORDS = Set.of('u', 'e', 'a', 'i');
@@ -68,6 +66,54 @@ public class WordCalculationServiceTest {
         Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWords(viableWords, counts, 1, 100, Set.of(requiredChar));
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
+    }
+
+    @Test
+    void calculateFishingWordsByPosition_priotizesNewLettersFollowedByPossibleSolutions() {
+        Set<Word> allWords = Arrays.stream("AA, AB, AC, AD, BA, BB, BC, BD, CA, CB, CC, CD, DA, DB, DC, DD".split(", ")).map(Word::new).collect(Collectors.toSet());
+        Set<Word> viableWords = Stream.of("AA", "AC", "AD").map(Word::new).collect(Collectors.toSet());
+        WordRestrictions restrictions = new WordRestrictions("A1B!2CD");
+        //
+        // solution: AA
+        // first guess: AB
+        // viable words: AA, AC, AD
+        //
+        // character counts: 1- a:3, 2- a:1, c:1, d:1
+        //
+        // ideal fishing words: CD, DC
+        //
+
+        var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+
+        Set<String> expected = Set.of("CD", "DC");
+
+//        Assertions.assertTrue(scores.stream().limit(2).map(WordFrequencyScore::word).collect(Collectors.toSet()).containsAll(expected), "Top solutions did not match expected");
+        System.out.println(scores.toString());
+    }
+
+    @Test
+    void calculateFishingWordsByCharacter2() {
+        Set<Word> allWords = Stream.of("haver", "chivy", "bumph").map(Word::new).collect(Collectors.toSet());
+        Set<Word> viableWords = Stream.of("hover", "mover", "homer", "joker", "poker", "rover", "boxer", "foyer", "roger").map(Word::new).collect(Collectors.toSet());
+        WordRestrictions restrictions = new WordRestrictions("BE4!5FGHJKMO2PQR5UVXYZ".toLowerCase());
+
+        var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+
+        System.out.println(scores.toString());
+    }
+
+    @Test
+    void calculateFishingWordsByCharacter3() {
+        Set<Word> allWords = Stream.of("haven", "hakim", "bumph").map(Word::new).collect(Collectors.toSet());
+        Set<Word> viableWords = Stream.of("hover", "mover", "homer", "joker", "poker", "rover", "boxer", "roger").map(Word::new).collect(Collectors.toSet());
+        WordRestrictions restrictions = new WordRestrictions("BE4!5FGHJKMO2PQR5!4UVXZ".toLowerCase());
+
+        var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+
+        System.out.println(scores.toString());
     }
 
 }

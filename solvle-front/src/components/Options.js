@@ -51,6 +51,10 @@ function Options(props) {
         fetch('/solvle/' + restrictionString + "?wordLength=" + boardState.settings.wordLength + "&wordList=" + dictionary)
             .then(res => res.json())
             .then((data) => {
+                if(data.restrictionString != restrictionString) {
+                    console.log("Recieved old data, disregarding");
+                    return;
+                }
                 console.log(data);
                 setCurrentOptions(data);
                 setLoading(false);
@@ -70,6 +74,11 @@ function Options(props) {
                     {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
                     {!loading && <OptionTab wordList={currentOptions.fishingWords} onSelectWord={onSelectWord}
                                heading={"Fishing Words"}/> }
+                </Tab>
+                <Tab eventKey="Remain" title="Remain" tabClassName="remTab" tabAttrs={{title:"Words that leave the fewest remaining choices."}}>
+                    {loading && <div>Loading...<Spinner animation="border" role="status" /> </div>}
+                    {!loading && <OptionTab wordList={currentOptions.bestWords} onSelectWord={onSelectWord}
+                               heading={currentOptions.bestWords.length <= 0 ? "Too many viable words " : "Minimize Remaining"}/> }
                 </Tab>
             </Tabs>
         </div>
