@@ -34,3 +34,6 @@ build/
 
 ### JMH
 *-jmh.txt
+
+### app-specific
+solvle-log.txt
