@@ -1,6 +1,8 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import AppContext from "../contexts/contexts";
-import {Button} from "react-bootstrap";
+import {Button, Form, FormControl, InputGroup, Modal} from "react-bootstrap";
+import Controls from "./Controls";
+import SolveModal from "./SolveModal";
 
 function BoardActions() {
 
@@ -31,6 +33,7 @@ function BoardActions() {
         <div>
             <Button title="clear all letters from the board" variant="dark" onClick={clickReset}>Reset Board</Button>
             <Button title="set all letters unavailable" variant="danger" onClick={excludeCurrent}>Exclude All</Button>
+            <SolveModal />
         </div>
     );
 }

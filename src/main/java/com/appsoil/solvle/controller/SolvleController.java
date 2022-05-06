@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -23,6 +24,7 @@ public class SolvleController {
     private static long requestsSinceLoading;
     private static final LocalDateTime startTime = LocalDateTime.now();
     private static LocalDateTime lastRequestLogTime = LocalDateTime.now();
+    private static int MAX_PARTITION = 200;
 
     public SolvleController(SolvleService solvleService) {
         this.solvleService = solvleService;
@@ -36,30 +38,32 @@ public class SolvleController {
                                    @RequestParam(defaultValue = "4") double rightLocationMultiplier,
                                    @RequestParam(defaultValue = "9") double uniquenessMultiplier,
                                    @RequestParam(defaultValue = ".007") double viableWordPreference,
-                                   @RequestParam(defaultValue = "50") int partitionThreshold,
-                                   @RequestParam(defaultValue="OPTIMAL_MEAN") String config
+                                   @RequestParam(defaultValue = "50") int partitionThreshold
                                    ) {
 
 
         logRequestsCount();
-        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, false, partitionThreshold, 2, viableWordPreference);
-        log.info(wordCalculationConfig);
+        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
+                false, Math.min(partitionThreshold, MAX_PARTITION), 2, viableWordPreference);
+        log.info("Valid words requested with configuration {}", wordCalculationConfig);
         SolvleDTO result = solvleService.getValidWords(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
     }
 
     @GetMapping("/solve/{solution}")
     public List<String> solvePuzzle(@PathVariable String solution,
-                                    @RequestParam(defaultValue = "200") int permutationThreshold,
                                     @RequestParam(defaultValue = "") String firstWord,
-                                    @RequestParam(defaultValue="OPTIMAL_MEAN") String config
+                                    @RequestParam(defaultValue = "4") double rightLocationMultiplier,
+                                    @RequestParam(defaultValue = "9") double uniquenessMultiplier,
+                                    @RequestParam(defaultValue = ".007") double viableWordPreference,
+                                    @RequestParam(defaultValue = "50") int partitionThreshold
                                     ) {
-        Solver solver = new RemainingSolver(solvleService, getConfig(config, permutationThreshold));
-        return solvleService.solveWord(solver, new Word(solution), firstWord);
-    }
-
-    private WordCalculationConfig getConfig(String configName, int permutationThreshold) {
-        return WordCalculationConfig.withPartitionThreshold(Math.min(permutationThreshold, 200), WordCalculationConfig.DEFAULT_CONFIGS.get(configName));
+        logRequestsCount();
+        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
+                false, partitionThreshold, 2, viableWordPreference);
+        log.info("Solution requested for [{}] with first word [{}] and configuration {}", solution, firstWord, wordCalculationConfig);
+        Solver solver = new RemainingSolver(solvleService, wordCalculationConfig);
+        return solvleService.solveWord(solver, new Word(solution.toLowerCase()), firstWord.toLowerCase());
     }
 
     private static void logRequestsCount() {

@@ -114,6 +114,14 @@ nav h1 {
   color: lightgray;
   background-color: #3a393c;
 }
+.btn-info{
+  color: lightgray;
+  background-color: #3a393c;
+}
+.btn-dark{
+  color: lightgray;
+  background-color: #3a393c;
+}
 
 .controls button {
   padding-left: 5px;
@@ -259,4 +267,5 @@ nav h1 {
   top: 6%;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
 }

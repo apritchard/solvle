@@ -12,10 +12,14 @@ function Keyboard() {
         onSelectLetter,
         onEnter,
         onDelete,
+        solverOpen
     } = useContext(AppContext);
 
     const handleKeyboard = useCallback(
         (event) => {
+            if(solverOpen) {
+                return;
+            }
             if (event.key === "Enter") {
                 onEnter();
             } else if (event.key === "Backspace") {

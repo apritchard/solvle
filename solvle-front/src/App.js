@@ -90,6 +90,7 @@ function App() {
     const [unsureLetters, setUnsureLetters] = useState(initialUnsureLetters(boardState.settings.wordLength));
     const [currentOptions, setCurrentOptions] = useState(initialOptions());
     const [dictionary, setDictionary] = useState("simple");
+    const [solverOpen, setSolverOpen] = useState(false);
 
     const resetBoard = (rows, width) => {
         setBoardState(initialBoardState(rows, width));
@@ -285,6 +286,8 @@ function App() {
                 unsureLetters,
                 dictionary,
                 setDictionary,
+                solverOpen,
+                setSolverOpen,
                 onSelectLetter,
                 onDelete,
                 onEnter,
