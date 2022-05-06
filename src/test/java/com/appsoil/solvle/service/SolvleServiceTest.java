@@ -42,7 +42,7 @@ public class SolvleServiceTest {
 
     Solver fishingSolver;
 
-    WordCalculationConfig config = WordCalculationConfig.getOptimalMeanConfig();
+    WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
 
     @PostConstruct
     void postConstruct() {

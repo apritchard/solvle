@@ -236,7 +236,7 @@ public class WordCalculationService {
                 double uniqueBonus = (word.letters().get(c) < 2) && !wordRestrictions.requiredLetters().contains(c) ? uniquenessMultiplier : 1;
                 double numerator = wordsWithCharacter.get(j+1).containsKey(c) ? harmonic(wordsWithCharacter.get(j+1).get(c).intValue()): 0;
                  totalScore += ((numerator * locationBonus * uniqueBonus)
-                         / (containedWords.size() * maxScore * rightLocationMultiplier)); //divide by max score * rightLocationMult to normalize scores closer to 100%
+                         / (containedWords.size() * maxScore * rightLocationMultiplier)); //divide by max score * bonuses to normalize scores closer to 100%
             }
         }
 

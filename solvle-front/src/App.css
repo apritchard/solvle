@@ -60,6 +60,7 @@ nav h1 {
   height: 100%;
   width: 90%;
   border: 1px solid black;
+  overflow: auto;
 }
 
 .solvle-row {
@@ -77,7 +78,7 @@ nav h1 {
   margin: 5px;
   display: grid;
   place-items: center;
-  font-size: 30px;
+  font-size: 3vh;
   font-weight: bolder;
   color: white;
   font-family: Arial, Helvetica, sans-serif;
@@ -242,6 +243,13 @@ nav h1 {
   margin-left: 10px;
   margin-top: 10px;
   background-color: #3a393c;
+}
+
+.header .btn-primary {
+  margin-left: 10px;
+  margin-top: 10px;
+  background-color: #3a393c;
+  border-color: #528d4e;
 }
 
 .header .alertDialog {

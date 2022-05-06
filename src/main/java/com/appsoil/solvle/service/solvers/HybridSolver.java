@@ -21,7 +21,7 @@ public class HybridSolver implements Solver {
     private int fishingThreshold;
     private int requiredThreshold;
     private int positionThreshold;
-    WordCalculationConfig config = WordCalculationConfig.getOptimalMeanConfig();
+    WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
 
     public HybridSolver(SolvleService solvleService, int fishingThreshold, int requiredThreshold, int positionThreshold) {
         this.solvleService = solvleService;

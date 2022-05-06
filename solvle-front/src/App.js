@@ -6,13 +6,13 @@
 import "./App.css";
 import Board from "./components/Board";
 import Keyboard from "./components/Keyboard";
-import React, {useState, createContext} from "react";
+import React, {useState} from "react";
 import Options from "./components/Options";
-import Controls from "./components/Controls";
 import {MdHelp} from 'react-icons/md';
 import SolvleAlert from "./components/SolvleAlert";
-
-export const AppContext = createContext();
+import Config from "./components/Config";
+import AppContext from "./contexts/contexts";
+import BoardActions from "./components/BoardActions";
 
 function App() {
 
@@ -37,8 +37,19 @@ function App() {
             settings: {
                 wordLength: width,
                 attempts: rows,
-                results: 50
-            }
+                results: 50,
+                useBias: localStorage.getItem("useBias") === 'true',
+                usePartitioning: localStorage.getItem("usePartitioning") === 'true',
+                calculationConfig: {
+                    rightLocationMultiplier: localStorage.getItem("rightLocationMultiplier") || 4,
+                    uniquenessMultiplier: localStorage.getItem("uniquenessMultiplier") || 9,
+                    useHarmonic: false,
+                    partitionThreshold: localStorage.getItem("partitionThreshold") !== null ? localStorage.getItem("partitionThreshold") : 30,
+                    fishingThreshold: 2,
+                    viableWordPreference: localStorage.getItem("viableWordPreference") !== null ? localStorage.getItem("viableWordPreference") : .007
+                }
+            },
+            shouldUpdate: false
         }
     }
 
@@ -70,7 +81,7 @@ function App() {
             fishingWords: new Set(),
             bestWords: new Set(),
             wordsWithCharacter: new Map(),
-            totalWords: 0
+            totalWords: 0,
         }
     }
 
@@ -118,6 +129,17 @@ function App() {
             prev.delete(letter);
             return new Set([...prev]);
         });
+    }
+
+    const setAllUnavailable = () => {
+        for(let i=0; i < boardState.board.length; i++) {
+            for(let j=0; j < boardState.board[i].length; j++) {
+                removeAvailableLetter(boardState.board[i][j]);
+            }
+        }
+        setUnsureLetters(initialUnsureLetters(boardState.settings.wordLength))
+        setKnownLetters(initialKnownLetters(boardState.settings.wordLength));
+
     }
 
     const clearPosition = (attempt, pos, replacementLetter) => {
@@ -248,58 +270,62 @@ function App() {
             <li>The top 100 viable words appear on the right. You can click a word to fill in its letters on the current line.</li>
             <li>Numbers under each letter on the keyboard indicate how many of the available words include that letter.</li>
             <li>Fishing words help you 'fish' for new letters without trying to reuse existing letters.</li>
+            <li>Click the gear wheel to enable more complex recommendation options.</li>
         </ul></div>
 
     return (
-        <div className="App">
-            <nav>
-                <div className="header">
-                    <h1>Solvle</h1>
-                    <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool"
-                                 message={helpText}
-                                 persist={true}
-                                 persistMessage={"?"}
-                                 persistVariant={"dark"}/>
-                    <div className="helpIcon">
-                        <MdHelp
-                            title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
+        <AppContext.Provider
+            value={{
+                boardState,
+                setBoardState,
+                currentOptions,
+                setCurrentOptions,
+                availableLetters,
+                knownLetters,
+                unsureLetters,
+                dictionary,
+                setDictionary,
+                onSelectLetter,
+                onDelete,
+                onEnter,
+                addKnownLetter,
+                removeKnownLetter,
+                addUnsureLetter,
+                removeUnsureLetter,
+                addAvailableLetter,
+                removeAvailableLetter,
+                setAllUnavailable,
+                onSelectWord,
+                resetBoard
+            }}
+        >
+            <div className="App">
+                <nav>
+                    <div className="header">
+                        <h1>Solvle</h1>
+                        <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool"
+                                     message={helpText}
+                                     persist={true}
+                                     persistMessage={"?"}
+                                     persistVariant={"dark"}/>
+                        <Config/>
+                        <div className="helpIcon">
+                            <MdHelp
+                                title="This is a toy project built to learn React. Source code available at https://github.com/apritchard/solvle"/>
+                        </div>
                     </div>
-                </div>
-            </nav>
-            <AppContext.Provider
-                value={{
-                    boardState,
-                    setBoardState,
-                    currentOptions,
-                    setCurrentOptions,
-                    availableLetters,
-                    knownLetters,
-                    unsureLetters,
-                    dictionary,
-                    setDictionary,
-                    onSelectLetter,
-                    onDelete,
-                    onEnter,
-                    addKnownLetter,
-                    removeKnownLetter,
-                    addUnsureLetter,
-                    removeUnsureLetter,
-                    addAvailableLetter,
-                    removeAvailableLetter,
-                    onSelectWord,
-                    resetBoard
-                }}
-            >
+                </nav>
+
                 <div className="game">
-                    <Controls/>
+                    <BoardActions />
                     <div className="parent">
                         <Board/>
                         <Options/>
                     </div>
                     <Keyboard/>
                 </div>
-            </AppContext.Provider>
-        </div>
+            </div>
+        </AppContext.Provider>
     );
 }
 

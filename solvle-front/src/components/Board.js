@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {AppContext} from "../App";
+import AppContext from "../contexts/contexts";
 import Row from "./Row";
 
 function Board() {

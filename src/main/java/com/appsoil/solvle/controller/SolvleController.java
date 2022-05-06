@@ -31,26 +31,35 @@ public class SolvleController {
     @CrossOrigin
     @GetMapping("/{wordRestrictions}")
     public SolvleDTO getValidWords(@PathVariable String wordRestrictions,
-                                   @RequestParam int wordLength,
-                                   @RequestParam(defaultValue = "simple") String wordList) {
+                                   @RequestParam(defaultValue= "5") int wordLength,
+                                   @RequestParam(defaultValue = "simple") String wordList,
+                                   @RequestParam(defaultValue = "4") double rightLocationMultiplier,
+                                   @RequestParam(defaultValue = "9") double uniquenessMultiplier,
+                                   @RequestParam(defaultValue = ".007") double viableWordPreference,
+                                   @RequestParam(defaultValue = "50") int partitionThreshold,
+                                   @RequestParam(defaultValue="OPTIMAL_MEAN") String config
+                                   ) {
 
 
         logRequestsCount();
-        SolvleDTO result = solvleService.getValidWords(wordRestrictions.toLowerCase(), wordLength, wordList, WordCalculationConfig.getOptimalMeanConfig());
+        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, false, partitionThreshold, 2, viableWordPreference);
+        log.info(wordCalculationConfig);
+        SolvleDTO result = solvleService.getValidWords(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
     }
 
     @GetMapping("/solve/{solution}")
     public List<String> solvePuzzle(@PathVariable String solution,
                                     @RequestParam(defaultValue = "200") int permutationThreshold,
-                                    @RequestParam(defaultValue = "") String firstWord) {
-
-        Solver solver = new RemainingSolver(solvleService, getConfig(permutationThreshold));
+                                    @RequestParam(defaultValue = "") String firstWord,
+                                    @RequestParam(defaultValue="OPTIMAL_MEAN") String config
+                                    ) {
+        Solver solver = new RemainingSolver(solvleService, getConfig(config, permutationThreshold));
         return solvleService.solveWord(solver, new Word(solution), firstWord);
     }
 
-    private WordCalculationConfig getConfig(int permutationThreshold) {
-        return WordCalculationConfig.withPartitionThreshold(Math.min(permutationThreshold, 200), WordCalculationConfig.getOptimalMeanConfig());
+    private WordCalculationConfig getConfig(String configName, int permutationThreshold) {
+        return WordCalculationConfig.withPartitionThreshold(Math.min(permutationThreshold, 200), WordCalculationConfig.DEFAULT_CONFIGS.get(configName));
     }
 
     private static void logRequestsCount() {

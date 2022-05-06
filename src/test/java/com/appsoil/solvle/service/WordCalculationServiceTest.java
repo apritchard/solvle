@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class WordCalculationServiceTest {
 
-    WordCalculationService wordCalculationService = new WordCalculationService(WordCalculationConfig.getOptimalMeanConfig());
+    WordCalculationService wordCalculationService = new WordCalculationService(WordCalculationConfig.OPTIMAL_MEAN);
 
     private final Set<Word> ALL_LETTERS_WORD_SET = Stream.of("how", "quickly", "daft", "jumping", "zebras", "vex").map(Word::new).collect(Collectors.toSet());
     private final Set<Character> CHARACTERS_IN_TWO_WORDS = Set.of('u', 'e', 'a', 'i');

@@ -25,7 +25,7 @@ public class FishingSolver implements Solver {
     @Override
     public List<String> solve(Word word, Set<Word> viable, Set<Word> fishing, String firstWord) {
         WordRestrictions wordRestrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
-        WordCalculationConfig config = WordCalculationConfig.getOptimalMeanConfig();
+        WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
         List<String> solution = new ArrayList<>();
 
         //get the first guess

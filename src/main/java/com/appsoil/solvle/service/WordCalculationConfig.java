@@ -1,8 +1,10 @@
 package com.appsoil.solvle.service;
 
+import java.util.Map;
+
 public record  WordCalculationConfig (
         double rightLocationMultiplier,     // multiplies a letter score if this letter is in the correct position. Best range: [3-6]
-        double uniquenessMultiplier,        // multiplies a letter score if it is not duplicate in the current word Best range: [4-8]
+        double uniquenessMultiplier,        // multiplies a letter score if it is not duplicate in the current word Best range: [4-9]
         boolean useHarmonic,                // scales down impact of more matches to prioritize new letters > important letters. Increases mean, but decreases max.
         int partitionThreshold,             // number of viable words below which word partition calcs are performed. Impacts performance noticeably above 10, very significantly above 100.
         int fishingThreshold,               // used by solvers to determine when to switch to only viable word choices. Best value is usually 2 or 3.
@@ -14,46 +16,71 @@ public record  WordCalculationConfig (
     }
 
     /**
-     * Returns a config that will not utilize letter position bias or remaining word partitioning.
+     * config that will not utilize letter position bias or remaining word partitioning.
+     * {2=51, 3=743, 4=1221, 5=284, 6=16}
+     * Mean: 3.7714902807775377
+     * StDv: 0.7123185627850815
+     * Median: 4.0
      * @return
      */
-    public static WordCalculationConfig getSimpleConfig() {
-        return new WordCalculationConfig(0, 0, false, 0, 2, 0);
-    }
+    public static WordCalculationConfig SIMPLE = new WordCalculationConfig(0, 0, false, 0, 2, 0);
 
     /**
      * Returns a config that minimizes the mean score without failing
-     * {2=79, 3=1145, 4=988, 5=98, 6=5}
-     *  mean: 3.483801295896329
-     *  std dev: 0.644819307834611
+     * {2=79, 3=1142, 4=996, 5=94, 6=4}
+     *  mean: 3.4825054
+     *  std dev: 0.640076658
      *  median: 3.0
      * @return
      */
-    public static WordCalculationConfig getOptimalMeanConfig() {
-        return new WordCalculationConfig(4, 8, false, 50, 2, .007);
-    }
+    public static WordCalculationConfig OPTIMAL_MEAN =  new WordCalculationConfig(4, 9, false, 50, 2, .007);
 
     /**
      * Returns a config guaranteed to solve any wordle in 5 or fewer guesses, at the cost of higher mean
-     *  {2=45, 3=694, 4=1290, 5=286}
-     *  mean: 3.7848812095032396
-     *  std dev: 0.6745371479880169
+     *  {2=79, 3=928, 4=1164, 5=144}
+     *  mean: 3.593088553
+     *  std dev: 0.658922347
      *  median: 4.0
      * @return
      */
-    public static WordCalculationConfig getLowestMaxConfig() {
-        return new WordCalculationConfig(3, 5, true, 20, 2, 0.0);
-    }
+    public static WordCalculationConfig LOWEST_MAX = new WordCalculationConfig(1, 5, false, 50, 2, 0.01);
 
     /**
      * Maximize the number of scores 3 and below
-     * {2=83, 3=1156, 4=954, 5=111, 6=10, 7=1}
-     *  mean: 3.4868250539956804
-     *  std dev: 0.669868910970966
+     * {2=76, 3=1172, 4=943, 5=113, 6=11}
+     *  mean: 3.486393089
+     *  std dev: 0.664679133
      *  median: 3.0
      * @return
      */
-    public static WordCalculationConfig getMaximizeThreeConfig() {
-        return new WordCalculationConfig(3, 5, false, 50, 3, .007);
-    }
+    public static WordCalculationConfig THREE_OR_LESS = new WordCalculationConfig(4, 8, false, 50, 3, .001);
+
+    /**
+     * Maximize the number of scores 4 and below
+     * {2=76, 3=1127, 4=1020, 5=88, 6=4}
+     *  mean: 3.488984881
+     *  std dev: 0.634116865
+     *  median: 3.0
+     * @return
+     */
+    public static WordCalculationConfig FOUR_OR_LESS = new WordCalculationConfig(3, 10, false, 50, 2, .007);
+
+    /**
+     * Maximize the number of scores 2 at all cost
+     * {2=147, 3=958, 4=968, 5=214, 6=26, 7=1, 8=1}
+     *  mean: 3.577105832
+     *  std dev: 0.798384986
+     *  median: 4.0
+     * @return
+     */
+    public static WordCalculationConfig TWO_OR_LESS =  new WordCalculationConfig(10, 3, false, 10, 2, .25);
+
+    public static Map<String, WordCalculationConfig> DEFAULT_CONFIGS = Map.of(
+            "SIMPLE", SIMPLE,
+            "OPTIMAL_MEAN", OPTIMAL_MEAN,
+            "LOWEST_MAX", LOWEST_MAX,
+            "THREE_OR_LESS", THREE_OR_LESS,
+            "FOUR_OR_LESS", FOUR_OR_LESS,
+            "TWO_OR_LESS", TWO_OR_LESS
+    );
 }

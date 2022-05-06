@@ -8,6 +8,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -39,7 +40,7 @@ public class FullDictionaryTest {
 
     @AfterAll
     static private void report() {
-        log.info("Begin report:");
+        log.warn("Begin report full report:");
         testReports.forEach(FullDictionaryTest::logReport);
     }
 
@@ -59,12 +60,13 @@ public class FullDictionaryTest {
         var countMap = Arrays.stream(report.stats().getSortedValues()).mapToInt(num -> (int) num).boxed().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         log.info(config);
         log.info("Mean: {}, StDv: {}, Median: {}, Counts: {}", report.stats().getMean(), report.stats().getStandardDeviation(), report.stats().getPercentile(50), countMap);
+        logReport(config, report);
     }
 
     static private void logReport(WordCalculationConfig config, TestReport report) {
         //format data to copy into an annoying spreadsheet
         var countMap = Arrays.stream(report.stats().getSortedValues()).mapToInt(num -> (int) num).boxed().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        log.info("{}\t{}\t{}\t{}\t{}\t{}\t\t\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t",
+        log.warn("{}\t{}\t{}\t{}\t{}\t{}\t\t\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                 report.stats().getMean(),
                 report.stats().getMin(),
                 report.stats().getMax(),
@@ -83,8 +85,8 @@ public class FullDictionaryTest {
                 countMap.getOrDefault(5, 0l),
                 countMap.getOrDefault(6, 0l),
                 countMap.getOrDefault(7, 0l),
-                countMap.getOrDefault(8, 0l),
-                countMap.getOrDefault(1, 0l) + countMap.getOrDefault(2, 0l) + countMap.getOrDefault(3, 0l)
+                (countMap.getOrDefault(8, 0l) + countMap.getOrDefault(9, 0l) + countMap.getOrDefault(10, 0l)),
+                (countMap.getOrDefault(1, 0l) + countMap.getOrDefault(2, 0l) + countMap.getOrDefault(3, 0l))
         );
     }
 
@@ -96,7 +98,7 @@ public class FullDictionaryTest {
             "5, 5, 5",
     })
     public void dictionaryHybridSolver( int fishingThreshold, int requiredThreshold, int positionThreshold ) {
-        WordCalculationConfig config = WordCalculationConfig.getOptimalMeanConfig();
+        WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
         log.info("Starting hybrid solver {}, {}, {}", fishingThreshold, requiredThreshold, positionThreshold);
         String firstWord = "";
         solvleService.solveDictionary(new HybridSolver(solvleService, fishingThreshold, requiredThreshold, positionThreshold), firstWord, config);
@@ -117,7 +119,10 @@ public class FullDictionaryTest {
 
     @ParameterizedTest
     @CsvSource({
-            "2, 3, 5, 0, false, 0.007",
+            "2, 4, 9, 100, false, .007",
+            "2, 3, 7, 100, false, .007",
+            "2, 4, 9, 50, false, .007",
+            "2, 3, 7, 50, false, .007",
     })
     public void dictionaryRemainingPermutationSolver( int fishingThreshold, double rightLocationMultiplier, double uniquenessMultiplier, int permutationThreshold, boolean useHarmonic, double viableWordPreference) {
         log.info("Starting permutation solver {}, {}", fishingThreshold, permutationThreshold);
@@ -140,14 +145,21 @@ public class FullDictionaryTest {
         for(int i = 1; i <= 10; i++) {
             for(int j = 1; j <= 10; j++) {
 //                for(int k = 5; k <= 50; k+= 5) {
-                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 0, 2, .001)));
-                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 0, 2, .005)));
-                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 0, 2, .007)));
-                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 0, 2, .01)));
+                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 10, 2, .25)));
 //                }
             }
         }
         return args.stream();
+    }
+
+
+    @Test
+    public void compareStandardConfigs() {
+        String firstWord = "";
+        WordCalculationConfig.DEFAULT_CONFIGS.forEach((name, config) -> {
+            log.info("Running " + name);
+            addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config));
+        });
     }
 
 
