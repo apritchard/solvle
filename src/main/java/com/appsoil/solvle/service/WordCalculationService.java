@@ -194,10 +194,10 @@ public class WordCalculationService {
      * Calculates letter frequency. A value of 1.0 represents that all letters in the solution set contain exactly the same
      * letters as the word under consideration, while a value of 0.6 would represent that 3/5 letters in this word are found
      * in every word of the contained set.
-     * @param word
-     * @param wordsWithCharacter
-     * @param totalWords
-     * @param maxScore
+     * @param word The Word to score
+     * @param wordsWithCharacter A map of how many words contain each character
+     * @param totalWords The number of words in the viable words set
+     * @param maxScore The number of letters available for scoring. For example, if we already know 2 letters of a 5-letter word, the max score is 3
      * @return
      */
     protected Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, int totalWords, int maxScore) {
@@ -298,17 +298,7 @@ public class WordCalculationService {
         //for each word in the pool, create a new wordRequirements as if that word had been picked for each solution
         //  then calculate how many remaining words are left and average the results
         for(Word word : wordPool) {
-            DescriptiveStatistics stats = null;
-            for(Word solution : containedWords) {
-                WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(solution, word, startingRestrictions);
-                Set<Word> newWords = findMatchingWords(containedWords, newRestrictions);
-                if(!newWords.isEmpty()) {
-                    if(stats == null) {
-                        stats = new DescriptiveStatistics();
-                    }
-                    stats.addValue(newWords.size());
-                }
-            }
+            DescriptiveStatistics stats = getPartitionStatsForWord(startingRestrictions, containedWords, word);
             if(stats != null ) {
                 statSummary.put(word, stats);
             }
@@ -319,6 +309,21 @@ public class WordCalculationService {
                         ((1.0 - (v.getMean() / containedWords.size()))
                                 + (containedWords.contains(k) ? viableWordPreference : 0))))); // add tiny bonus to viable words so they are prioritized
         return scores;
+    }
+
+    public DescriptiveStatistics getPartitionStatsForWord(WordRestrictions startingRestrictions, Set<Word> containedWords, Word word) {
+        DescriptiveStatistics stats = null;
+        for(Word solution : containedWords) {
+            WordRestrictions newRestrictions = WordRestrictions.generateRestrictions(solution, word, startingRestrictions);
+            Set<Word> newWords = findMatchingWords(containedWords, newRestrictions);
+            if(!newWords.isEmpty()) {
+                if(stats == null) {
+                    stats = new DescriptiveStatistics();
+                }
+                stats.addValue(newWords.size());
+            }
+        }
+        return stats;
     }
 
     /**

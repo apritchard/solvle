@@ -1,6 +1,7 @@
 package com.appsoil.solvle.service;
 
 import com.appsoil.solvle.controller.SolvleDTO;
+import com.appsoil.solvle.controller.WordScoreDTO;
 import com.appsoil.solvle.data.Dictionary;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
@@ -94,6 +95,39 @@ public class SolvleService {
         }
 
         return new SolvleDTO("", wordFrequencyScores, fishingWordScores, remainingWords, containedWords.size(), characterCounts);
+    }
+
+    public WordScoreDTO getScore(String restrictionString, String wordToScore, String wordList, WordCalculationConfig wordCalculationConfig) {
+        WordRestrictions wordRestrictions = new WordRestrictions(restrictionString);
+
+        Word word = new Word(wordToScore);
+        Set<Word> wordSet = getPrimarySet(wordList, wordToScore.length());
+        Set<Word> fishingSet = getFishingSet(wordList, wordToScore.length());
+
+        //get the counts
+        WordCalculationService wordCalculationService = new WordCalculationService(wordCalculationConfig);
+        Set<Word> containedWords = wordCalculationService.findMatchingWords(wordSet, wordRestrictions);
+
+        double score;
+        double remaining;
+
+        if(wordCalculationConfig.rightLocationMultiplier() == 0) {
+            score = wordCalculationService.calculateFreqScore(word,
+                    wordCalculationService.calculateCharacterCounts(containedWords),
+                    containedWords.size(),
+                    wordToScore.length() - wordRestrictions.requiredLetters().size());
+        } else {
+            score = wordCalculationService.calculateFreqScoreByPosition(word,
+                    wordCalculationService.calculateCharacterCountsByPosition(containedWords),
+                    containedWords,
+                    wordToScore.length() - wordRestrictions.requiredLetters().size(),
+                    wordRestrictions
+                    );
+        }
+
+        remaining = wordCalculationService.getPartitionStatsForWord(wordRestrictions, containedWords, word).getMean();
+
+       return new WordScoreDTO(remaining, score);
     }
 
     private Map<Character, LongAdder> mergeCharacterCounts(Map<Integer, Map<Character, LongAdder>> countsByPos) {

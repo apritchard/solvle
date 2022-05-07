@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -48,6 +47,22 @@ public class SolvleController {
         log.info("Valid words requested with configuration {}", wordCalculationConfig);
         SolvleDTO result = solvleService.getValidWords(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
+    }
+
+    @GetMapping("/{wordRestrictions}/{wordToScore}")
+    public WordScoreDTO getWordScore(@PathVariable String wordRestrictions,
+                                     @PathVariable String wordToScore,
+                                     @RequestParam(defaultValue = "simple") String wordList,
+                                     @RequestParam(defaultValue = "4") double rightLocationMultiplier,
+                                     @RequestParam(defaultValue = "9") double uniquenessMultiplier,
+                                     @RequestParam(defaultValue = ".007") double viableWordPreference,
+                                     @RequestParam(defaultValue = "50") int partitionThreshold) {
+        logRequestsCount();
+        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
+                false, Math.min(partitionThreshold, MAX_PARTITION), 2, viableWordPreference);
+        log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
+        WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore, wordList, wordCalculationConfig);
+        return result;
     }
 
     @GetMapping("/solve/{solution}")
