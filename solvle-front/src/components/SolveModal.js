@@ -66,7 +66,7 @@ function SolveModal(props) {
                     <Form onSubmit={solvePuzzle}>
                         <Form.Group className="mb-3" controlId="formSolution">
                             <Form.Label>Solution</Form.Label>
-                            <Form.Control value={solution} onChange={changeSolution} autoComplete="off"
+                            <Form.Control value={solution} onChange={changeSolution} autoComplete="off" autoFocus
                                           type="text" placeholder="The answer to today's puzzle goes here"/>
                         </Form.Group>
 
