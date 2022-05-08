@@ -61,7 +61,7 @@ public class SolvleController {
         WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
                 false, Math.min(partitionThreshold, MAX_PARTITION), 2, viableWordPreference);
         log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
-        WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore, wordList, wordCalculationConfig);
+        WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore.toLowerCase(), wordList, wordCalculationConfig);
         return result;
     }
 

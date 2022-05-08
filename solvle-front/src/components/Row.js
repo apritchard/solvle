@@ -1,6 +1,7 @@
 import React, {useContext} from 'react';
 import AppContext from "../contexts/contexts";
 import Letter from "./Letter";
+import RowScore from "./RowScore";
 
 function Row({attempt}) {
     const {
@@ -10,6 +11,9 @@ function Row({attempt}) {
     let letters = [];
     for(let i = 0; i < boardState.settings.wordLength; i++) {
         letters.push(<Letter key={"letter" + i + boardState.currAttempt.attempt} letterPos={i} attemptVal={attempt}/>);
+    }
+    if(boardState.settings.rateEnteredWords === true) {
+        letters.push(<RowScore rowNumber={attempt} />);
     }
 
     return (

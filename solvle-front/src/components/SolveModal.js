@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Button, Form, Modal} from "react-bootstrap";
 import AppContext from "../contexts/contexts";
+import {generateConfigParams} from "../functions/functions";
 
 function SolveModal(props) {
 
@@ -31,17 +32,9 @@ function SolveModal(props) {
 
     const solvePuzzle = (e) => {
         e.preventDefault();
-        let biasParams = boardState.settings.useBias ?
-            "&rightLocationMultiplier=" + boardState.settings.calculationConfig.rightLocationMultiplier +
-            "&uniquenessMultiplier=" + boardState.settings.calculationConfig.uniquenessMultiplier +
-            "&viableWordPreference=" + boardState.settings.calculationConfig.viableWordPreference
-            : "&rightLocationMultiplier=0&uniquenessMultiplier=0&viableWordPreference=0";
+        let configParams = generateConfigParams(boardState);
 
-        let partitionParams = boardState.settings.usePartitioning ?
-            "&partitionThreshold=" + boardState.settings.calculationConfig.partitionThreshold
-            : "&partitionThreshold=0";
-
-        fetch('/solvle/solve/' + solution + "?firstWord=" + firstWord + biasParams + partitionParams)
+        fetch('/solvle/solve/' + solution + "?firstWord=" + firstWord + configParams)
             .then(res => res.json())
             .then((data) => {
                 console.log(data);

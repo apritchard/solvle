@@ -71,11 +71,16 @@ nav h1 {
   border-top: 2px solid #121212;
 }
 
+.rowScore {
+  width: 7em;
+  text-align:left;
+}
+
 .letter {
   flex: 33%;
   height: 100%;
   border: 1px solid grey;
-  margin: 5px;
+  margin: 3px;
   display: grid;
   place-items: center;
   font-size: 3vh;
@@ -102,7 +107,6 @@ nav h1 {
   height: 30%;
   flex-direction: column;
 }
-
 
 .btn-primary {
   background-color: #528d4e;
@@ -161,11 +165,9 @@ nav h1 {
   background-color: #3a393c !important;
 }
 
-
 .optionItem {
   cursor: pointer;
 }
-
 
 #highlight {
   border-top: 2px solid #b49f39;

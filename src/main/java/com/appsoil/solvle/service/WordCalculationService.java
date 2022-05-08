@@ -157,17 +157,23 @@ public class WordCalculationService {
      * @return
      */
     public Set<WordFrequencyScore> calculateFishingWords(Set<Word> allWords, Map<Character, LongAdder> characterCounts, int viableWordsCount, int sizeLimit, Set<Character> requiredLetters) {
-        Map<Character, LongAdder> newMap = characterCounts.entrySet().stream()
+        return calculateViableWords(allWords, removeRequiredLettersFromCounts(characterCounts, requiredLetters), viableWordsCount, requiredLetters.size(), sizeLimit);
+    }
+
+    public Map<Character, LongAdder> removeRequiredLettersFromCounts(Map<Character, LongAdder> characterCounts, Set<Character> requiredLetters) {
+        return characterCounts.entrySet().stream()
                 .filter(entrySet -> !requiredLetters.contains(entrySet.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, ConcurrentHashMap::new));
-
-        return calculateViableWords(allWords, newMap, viableWordsCount, requiredLetters.size(), sizeLimit);
     }
 
     public Set<WordFrequencyScore> calculateFishingWordsByPosition(Set<Word> allWords, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int sizeLimit, WordRestrictions wordRestrictions) {
-
-        AtomicInteger removals = new AtomicInteger(0);
         double length = characterCounts.keySet().size();
+        double removedLetters = removeRequiredLettersFromCountsByPosition(characterCounts, wordRestrictions);
+        return calculateViableWordsByPosition(allWords, characterCounts, containedWords, (int)(removedLetters / length), sizeLimit, wordRestrictions);
+    }
+
+    public double removeRequiredLettersFromCountsByPosition(Map<Integer, Map<Character, LongAdder>> characterCounts, WordRestrictions wordRestrictions) {
+        AtomicInteger removals = new AtomicInteger(0);
 
         characterCounts.forEach((pos, v) -> {
             //remove characters from the positions you know they should or shouldn't be
@@ -185,8 +191,7 @@ public class WordCalculationService {
                 removals.incrementAndGet();
             }
         });
-
-        return calculateViableWordsByPosition(allWords, characterCounts, containedWords, (int)(removals.doubleValue() / length), sizeLimit, wordRestrictions);
+        return removals.doubleValue();
     }
 
 

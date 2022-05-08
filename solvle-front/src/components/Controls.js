@@ -74,6 +74,17 @@ function Controls() {
         }));
     }
 
+    const toggleRateEnteredWords = (e) => {
+        localStorage.setItem("rateEnteredWords", "" + !boardState.settings.rateEnteredWords);
+        setBoardState(prev => ({
+            ...prev,
+            settings: {
+                ...prev.settings,
+                rateEnteredWords: !boardState.settings.rateEnteredWords
+            }
+        }));
+    }
+
     const updateConfig = (e) => {
         localStorage.setItem(e.target.name, e.target.value);
         setBoardState(prev => ({
@@ -141,6 +152,8 @@ function Controls() {
     const partitionHelpText = "Partitioning calculates which words remove the largest percentage of available words from the viable pool by testing every" +
         " candidate word against each viable solution and counting how many choices can be eliminated. In simulations, partitioning solutions don't perform" +
         " much better than heuristics until the viable word list is down to about 50, so a value of 50 or lower is recommended."
+    const rateEnteredWordsHelpText = "Show fishing score and average words remaining for each word you enter. Calculates when you press ENTER using the currently selected letters, so" +
+        " it will only be accurate if you mark the state of your previous words, but not your current word, before pressing enter."
 
     const lowestAverageHelpText = "Produces the best average score (about 3.4825) and never fails a puzzle.";
     const lowestMaxHelpText = "Finishes all puzzles in 5 or fewer guesses, but worse average performance (about 3.593).";
@@ -192,6 +205,10 @@ function Controls() {
                 <div title={partitionHelpText}>
                     <MDBSwitch id='enablePartitioningSwitch' label="Enable Partitioning Calculation"
                                defaultChecked={boardState.settings.usePartitioning} onChange={togglePartitioning}/>
+                </div>
+                <div title={rateEnteredWordsHelpText}>
+                    <MDBSwitch id='enableWordRatingSwitch' label="Rate Entered Words"
+                               defaultChecked={boardState.settings.rateEnteredWords} onChange={toggleRateEnteredWords}/>
                 </div>
             </div>
             <div hidden={!boardState.settings.useBias}>

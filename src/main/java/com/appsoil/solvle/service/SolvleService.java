@@ -112,15 +112,18 @@ public class SolvleService {
         double remaining;
 
         if(wordCalculationConfig.rightLocationMultiplier() == 0) {
+            var counts = wordCalculationService.removeRequiredLettersFromCounts(wordCalculationService.calculateCharacterCounts(containedWords), wordRestrictions.requiredLetters());
             score = wordCalculationService.calculateFreqScore(word,
-                    wordCalculationService.calculateCharacterCounts(containedWords),
+                    counts,
                     containedWords.size(),
-                    wordToScore.length() - wordRestrictions.requiredLetters().size());
+                    wordToScore.length() - wordRestrictions.letterPositions().keySet().size());
         } else {
+            var counts = wordCalculationService.calculateCharacterCountsByPosition(containedWords);
+//            wordCalculationService.removeRequiredLettersFromCountsByPosition(counts, wordRestrictions);
             score = wordCalculationService.calculateFreqScoreByPosition(word,
-                    wordCalculationService.calculateCharacterCountsByPosition(containedWords),
+                    counts,
                     containedWords,
-                    wordToScore.length() - wordRestrictions.requiredLetters().size(),
+                    wordToScore.length() - wordRestrictions.letterPositions().keySet().size(),
                     wordRestrictions
                     );
         }

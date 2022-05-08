@@ -13,6 +13,7 @@ import SolvleAlert from "./components/SolvleAlert";
 import Config from "./components/Config";
 import AppContext from "./contexts/contexts";
 import BoardActions from "./components/BoardActions";
+import {generateConfigParams, generateRestrictionString} from "./functions/functions";
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
                 results: 50,
                 useBias: localStorage.getItem("useBias") === 'true',
                 usePartitioning: localStorage.getItem("usePartitioning") === 'true',
+                rateEnteredWords: localStorage.getItem("rateEnteredWords") === 'true',
                 calculationConfig: {
                     rightLocationMultiplier: localStorage.getItem("rightLocationMultiplier") || 4,
                     uniquenessMultiplier: localStorage.getItem("uniquenessMultiplier") || 9,
@@ -91,6 +93,7 @@ function App() {
     const [currentOptions, setCurrentOptions] = useState(initialOptions());
     const [dictionary, setDictionary] = useState("simple");
     const [solverOpen, setSolverOpen] = useState(false);
+    const [rowScores, setRowScores] = useState([])
 
     const resetBoard = (rows, width) => {
         setBoardState(initialBoardState(rows, width));
@@ -98,6 +101,7 @@ function App() {
         setUnsureLetters(initialUnsureLetters(width))
         setKnownLetters(initialKnownLetters(width));
         setCurrentOptions(initialOptions());
+        setRowScores([]);
     }
 
     const addKnownLetter = (pos, letter) => {
@@ -183,12 +187,32 @@ function App() {
 
     }
 
+    const updateWordRating = () => {
+        if (boardState.settings.rateEnteredWords) {
+
+            let restrictionString = generateRestrictionString(availableLetters, knownLetters, unsureLetters);
+            let configParams = generateConfigParams(boardState);
+
+            let currentWord = "";
+            console.log(boardState.board[boardState.currAttempt.attempt]);
+            boardState.board[boardState.currAttempt.attempt].map(letter => {currentWord+= letter});
+
+            fetch('/solvle/' + restrictionString + "/" + currentWord + "?wordList=" + dictionary + configParams)
+                .then(res => res.json())
+                .then((data) => {
+                    let newRowScores = rowScores;
+                    newRowScores[boardState.currAttempt.attempt] = data;
+                    setRowScores([...newRowScores]);
+                });
+        }
+    }
+
     const onEnter = () => {
         if (boardState.currAttempt.letter !== boardState.settings.wordLength) {
             return;
         }
-
         console.log("Updating board state");
+        updateWordRating();
         setBoardState(prev => ({
             ...prev,
             board: prev.board,
@@ -214,6 +238,9 @@ function App() {
                     letter: boardState.settings.wordLength
                 }
             }));
+            let newRowScores = rowScores;
+            newRowScores[boardState.currAttempt.attempt - 1] = null;
+            setRowScores([...newRowScores]);
             return;
         }
         clearPosition(boardState.currAttempt.attempt, boardState.currAttempt.letter - 1);
@@ -250,6 +277,7 @@ function App() {
             clearPosition(boardState.currAttempt.attempt, i, word[i]);
             newBoard[boardState.currAttempt.attempt][i] = word[i];
         }
+        updateWordRating();
         setBoardState(prev => ({
             ...prev,
             board: newBoard,
@@ -288,6 +316,7 @@ function App() {
                 setDictionary,
                 solverOpen,
                 setSolverOpen,
+                rowScores,
                 onSelectLetter,
                 onDelete,
                 onEnter,
@@ -305,7 +334,7 @@ function App() {
             <div className="App">
                 <nav>
                     <div className="header">
-                        <h1>Solvle</h1>
+                        <h1>🔍Solvle</h1>
                         <SolvleAlert heading="Welcome to Solvle - a Word Puzzle Analysis Tool"
                                      message={helpText}
                                      persist={true}
