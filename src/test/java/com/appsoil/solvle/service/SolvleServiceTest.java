@@ -5,9 +5,6 @@ import com.appsoil.solvle.data.Dictionary;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
 import com.appsoil.solvle.data.WordRestrictions;
-import com.appsoil.solvle.service.solvers.FishingSolver;
-import com.appsoil.solvle.service.solvers.Solver;
-import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -39,15 +36,8 @@ public class SolvleServiceTest {
 
     @Autowired
     SolvleService solvleService;
-
-    Solver fishingSolver;
-
     WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
 
-    @PostConstruct
-    void postConstruct() {
-        fishingSolver = new FishingSolver(solvleService);
-    }
 
     @ParameterizedTest
     @CsvSource(value = {

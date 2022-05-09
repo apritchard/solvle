@@ -6,7 +6,7 @@ import com.appsoil.solvle.data.Dictionary;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
 import com.appsoil.solvle.data.WordRestrictions;
-import com.appsoil.solvle.service.solvers.FishingSolver;
+import com.appsoil.solvle.service.solvers.RemainingSolver;
 import com.appsoil.solvle.service.solvers.Solver;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -101,7 +101,7 @@ public class SolvleService {
     public WordScoreDTO getScore(String restrictionString, String wordToScore, String wordList, WordCalculationConfig wordCalculationConfig) {
         WordRestrictions wordRestrictions = new WordRestrictions(restrictionString);
 
-        Word word = new Word(wordToScore);
+        Word word = new Word(wordToScore, 0);
         Set<Word> wordSet = getPrimarySet(wordList, wordToScore.length());
         Set<Word> fishingSet = getFishingSet(wordList, wordToScore.length());
 
@@ -119,8 +119,7 @@ public class SolvleService {
                     containedWords.size(),
                     wordToScore.length() - wordRestrictions.letterPositions().keySet().size());
         } else {
-            var counts = wordCalculationService.calculateCharacterCountsByPosition(containedWords);
-//            wordCalculationService.removeRequiredLettersFromCountsByPosition(counts, wordRestrictions);
+            var counts = wordCalculationService.removeRequiredLettersFromCountsByPosition(wordCalculationService.calculateCharacterCountsByPosition(containedWords), wordRestrictions);
             score = wordCalculationService.calculateFreqScoreByPosition(word,
                     counts,
                     containedWords,
@@ -193,7 +192,7 @@ public class SolvleService {
 
 
     public List<String> solveWord(Word word) {
-        return solveWord(new FishingSolver(this), word, "");
+        return solveWord(new RemainingSolver(this, WordCalculationConfig.SIMPLE), word, "");
     }
 
     /**

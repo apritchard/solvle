@@ -7,7 +7,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,7 +123,7 @@ public class WordCalculationService {
      */
     public Set<WordFrequencyScore> calculateViableWords(Set<Word> words, Map<Character, LongAdder> characterCounts, int viableWordsCount, int requiredCharCount, int sizeLimit) {
         return words.parallelStream()
-                .map(word -> new WordFrequencyScore(word.word(), calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount)))
+                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(), calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
@@ -132,7 +131,7 @@ public class WordCalculationService {
 
     public Set<WordFrequencyScore> calculateViableWordsByPosition(Set<Word> words, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int requiredCharCount, int sizeLimit, WordRestrictions wordRestrictions) {
         return words.parallelStream()
-                .map(word -> new WordFrequencyScore(word.word(), calculateFreqScoreByPosition(word, characterCounts, containedWords, word.getLength() - requiredCharCount, wordRestrictions)))
+                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(), calculateFreqScoreByPosition(word, characterCounts, containedWords, word.getLength() - requiredCharCount, wordRestrictions)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
@@ -160,38 +159,32 @@ public class WordCalculationService {
         return calculateViableWords(allWords, removeRequiredLettersFromCounts(characterCounts, requiredLetters), viableWordsCount, requiredLetters.size(), sizeLimit);
     }
 
+    public Set<WordFrequencyScore> calculateFishingWordsByPosition(Set<Word> allWords, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int sizeLimit, WordRestrictions wordRestrictions) {
+        return calculateViableWordsByPosition(allWords, removeRequiredLettersFromCountsByPosition(characterCounts, wordRestrictions), containedWords, wordRestrictions.letterPositions().keySet().size(), sizeLimit, wordRestrictions);
+    }
+
+    /**
+     * Returns a new map that matches the provided map, but any entries for one of the required letters has been removed.
+     * @param characterCounts
+     * @param requiredLetters
+     * @return
+     */
     public Map<Character, LongAdder> removeRequiredLettersFromCounts(Map<Character, LongAdder> characterCounts, Set<Character> requiredLetters) {
         return characterCounts.entrySet().stream()
                 .filter(entrySet -> !requiredLetters.contains(entrySet.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, ConcurrentHashMap::new));
     }
 
-    public Set<WordFrequencyScore> calculateFishingWordsByPosition(Set<Word> allWords, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int sizeLimit, WordRestrictions wordRestrictions) {
-        double length = characterCounts.keySet().size();
-        double removedLetters = removeRequiredLettersFromCountsByPosition(characterCounts, wordRestrictions);
-        return calculateViableWordsByPosition(allWords, characterCounts, containedWords, (int)(removedLetters / length), sizeLimit, wordRestrictions);
-    }
-
-    public double removeRequiredLettersFromCountsByPosition(Map<Integer, Map<Character, LongAdder>> characterCounts, WordRestrictions wordRestrictions) {
-        AtomicInteger removals = new AtomicInteger(0);
-
+    public Map<Integer, Map<Character, LongAdder>> removeRequiredLettersFromCountsByPosition(Map<Integer, Map<Character, LongAdder>> characterCounts, WordRestrictions wordRestrictions) {
+        Map<Integer, Map<Character, LongAdder>> newMap = new ConcurrentHashMap<>();
         characterCounts.forEach((pos, v) -> {
-            //remove characters from the positions you know they should or shouldn't be
-            if(wordRestrictions.positionExclusions().containsKey(pos)) {
-                wordRestrictions.positionExclusions().get(pos).forEach(c -> {
-                    if(v.containsKey(c)) {
-                        v.get(c).reset();
-                        removals.incrementAndGet();
-                    }
-                });
-            }
-            Character knownPos = wordRestrictions.letterPositions().get(pos);
-            if(knownPos != null && v.containsKey(knownPos)) {
-                v.get(knownPos).reset();
-                removals.incrementAndGet();
+            if(!wordRestrictions.letterPositions().containsKey(pos) || !v.containsKey(wordRestrictions.letterPositions().get(pos))) {
+                newMap.put(pos, v);
+            } else {
+                newMap.put(pos, new ConcurrentHashMap<>());
             }
         });
-        return removals.doubleValue();
+        return newMap;
     }
 
 
@@ -271,11 +264,9 @@ public class WordCalculationService {
             //get a pool of words taken from the top fishing and valid list
             Set<Word> wordPool = Stream.of(wordFrequencyScores, fishingWords)
                     .flatMap(Set::stream)
-                    .map(WordFrequencyScore::word)
                     .distinct()
-                    .map(Word::new)
+                    .map(wfs -> new Word(wfs.word(), wfs.naturalOrdering()))
                     .collect(Collectors.toSet());
-//            Set<String> viableStrings = wordFrequencyScores.stream().map(WordFrequencyScore::word).collect(Collectors.toSet()); //to give tiny bonus points
             return wordsByRemainingGuesses(wordRestrictions, containedWords, wordPool);
         } else {
             return new HashSet<>();
@@ -292,30 +283,36 @@ public class WordCalculationService {
      */
     public Set<WordFrequencyScore> wordsByRemainingGuesses(WordRestrictions startingRestrictions, Set<Word> containedWords, Set<Word> wordPool) {
         if(containedWords.size() <= 2) {
-            //50/50 shot either way
-            return containedWords.stream().map(word -> new WordFrequencyScore(word.word(), 1.0 / containedWords.size())).collect(Collectors.toSet());
+            //50/50 shot either way, so don't bother calculating
+            return containedWords.stream().map(word -> new WordFrequencyScore(word.getOrder(), word.word(), 1.0 / containedWords.size())).collect(Collectors.toSet());
         }
 
         Set<WordFrequencyScore> scores = new TreeSet<>();
-
-        Map<Word, DescriptiveStatistics> statSummary = new HashMap<>();
+        Map<Word, DescriptiveStatistics> statSummary = new ConcurrentHashMap<>();
 
         //for each word in the pool, create a new wordRequirements as if that word had been picked for each solution
         //  then calculate how many remaining words are left and average the results
-        for(Word word : wordPool) {
+        wordPool.parallelStream().forEach(word -> {
             DescriptiveStatistics stats = getPartitionStatsForWord(startingRestrictions, containedWords, word);
             if(stats != null ) {
                 statSummary.put(word, stats);
             }
-        }
+        });
 
         statSummary.forEach((k, v) ->
-                scores.add(new WordFrequencyScore(k.word(),
+                scores.add(new WordFrequencyScore(k.getOrder(), k.word(),
                         ((1.0 - (v.getMean() / containedWords.size()))
                                 + (containedWords.contains(k) ? viableWordPreference : 0))))); // add tiny bonus to viable words so they are prioritized
         return scores;
     }
 
+    /**
+     * Calculate how many words will remain in the word pool on average if a given word is selected
+     * @param startingRestrictions The restrictions that were used to generate the current set of contained words
+     * @param containedWords The currently available pool of valid solutions
+     * @param word The word to be evaluated
+     * @return A stats object populated with the counts of all the potential new words list
+     */
     public DescriptiveStatistics getPartitionStatsForWord(WordRestrictions startingRestrictions, Set<Word> containedWords, Word word) {
         DescriptiveStatistics stats = null;
         for(Word solution : containedWords) {

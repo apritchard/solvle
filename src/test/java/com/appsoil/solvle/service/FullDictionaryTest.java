@@ -1,7 +1,6 @@
 package com.appsoil.solvle.service;
 
 import com.appsoil.solvle.config.SolvleConfig;
-import com.appsoil.solvle.service.solvers.HybridSolver;
 import com.appsoil.solvle.service.solvers.RemainingSolver;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -88,20 +87,6 @@ public class FullDictionaryTest {
                 (countMap.getOrDefault(8, 0l) + countMap.getOrDefault(9, 0l) + countMap.getOrDefault(10, 0l)),
                 (countMap.getOrDefault(1, 0l) + countMap.getOrDefault(2, 0l) + countMap.getOrDefault(3, 0l))
         );
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "3, 5, 5",
-            "4, 5, 5",
-            "2, 5, 5",
-            "5, 5, 5",
-    })
-    public void dictionaryHybridSolver( int fishingThreshold, int requiredThreshold, int positionThreshold ) {
-        WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
-        log.info("Starting hybrid solver {}, {}, {}", fishingThreshold, requiredThreshold, positionThreshold);
-        String firstWord = "";
-        solvleService.solveDictionary(new HybridSolver(solvleService, fishingThreshold, requiredThreshold, positionThreshold), firstWord, config);
     }
 
     @ParameterizedTest

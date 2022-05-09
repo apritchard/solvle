@@ -37,7 +37,7 @@ public record WordRestrictions(Word word,
      *                  u3!4 - required in 3, not allowed in 4
      */
     public WordRestrictions(String word) {
-        this(new Word(word.replaceAll("[^A-Za-z]", "")),
+        this(new Word(word.replaceAll("[^A-Za-z]", ""), 0),
                 new HashSet<>(MAX_WORD_LENGTH),
                 new HashMap<>(MAX_WORD_LENGTH),
                 new HashMap<>(MAX_WORD_LENGTH));
@@ -79,8 +79,16 @@ public record WordRestrictions(Word word,
 
         String restrictionWord = currentRestrictions.word().word();
         Set<Character> newRequiredLetters = new HashSet<>(currentRestrictions.requiredLetters());
-        Map<Integer, Character> newLetterPositions = SerializationUtils.clone(new HashMap<>(currentRestrictions.letterPositions()));
-        Map<Integer, Set<Character>> newPositionExclusions = SerializationUtils.clone(new HashMap<>(currentRestrictions.positionExclusions()));
+
+        Map<Integer, Character> newLetterPositions = new HashMap<>();
+        currentRestrictions.letterPositions().forEach((pos, c) -> newLetterPositions.put(pos, c));
+
+        Map<Integer, Set<Character>> newPositionExclusions = new HashMap<>();
+        currentRestrictions.positionExclusions().forEach((pos, cs) -> {
+            Set<Character> newCs = new HashSet<>();
+            currentRestrictions.positionExclusions.get(pos).forEach(c -> newCs.add(c));
+            newPositionExclusions.put(pos, newCs);
+        });
 
         for(int i = 0; i < guess.getLength(); i++) {
             char c = guess.word().charAt(i);
