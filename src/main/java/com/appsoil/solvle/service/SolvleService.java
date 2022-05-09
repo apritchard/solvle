@@ -97,6 +97,7 @@ public class SolvleService {
         return new SolvleDTO("", wordFrequencyScores, fishingWordScores, remainingWords, containedWords.size(), characterCounts);
     }
 
+    @Cacheable("wordScore")
     public WordScoreDTO getScore(String restrictionString, String wordToScore, String wordList, WordCalculationConfig wordCalculationConfig) {
         WordRestrictions wordRestrictions = new WordRestrictions(restrictionString);
 
