@@ -104,10 +104,7 @@ public class FullDictionaryTest {
 
     @ParameterizedTest
     @CsvSource({
-            "2, 4, 9, 100, false, .007",
-            "2, 3, 7, 100, false, .007",
             "2, 4, 9, 50, false, .007",
-            "2, 3, 7, 50, false, .007",
     })
     public void dictionaryRemainingPermutationSolver( int fishingThreshold, double rightLocationMultiplier, double uniquenessMultiplier, int permutationThreshold, boolean useHarmonic, double viableWordPreference) {
         log.info("Starting permutation solver {}, {}", fishingThreshold, permutationThreshold);
@@ -127,12 +124,12 @@ public class FullDictionaryTest {
     private static Stream<Arguments> dictionaryPermutationParameters() {
         List<Arguments> args = new ArrayList<>();
 
-        for(int i = 1; i <= 10; i++) {
-            for(int j = 1; j <= 10; j++) {
+        for(int i = 2; i <= 5; i++) {
+//            for(int j = 1; j <= 10; j++) {
 //                for(int k = 5; k <= 50; k+= 5) {
-                    args.add(Arguments.of(new WordCalculationConfig(i, j, false, 10, 2, .25)));
+                    args.add(Arguments.of(new WordCalculationConfig(i, (2*i)+1, false, 200, 2, .007)));
 //                }
-            }
+//            }
         }
         return args.stream();
     }

@@ -32,6 +32,10 @@ public class RemainingSolver implements Solver {
         WordRestrictions wordRestrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
         List<String> solution = new ArrayList<>();
 
+        if(word.word().equals(firstWord)) {
+            return List.of(firstWord);
+        }
+
         if(firstWord != null && firstWord.length() == word.word().length()) {
             solution.add(firstWord);
             wordRestrictions = WordRestrictions.generateRestrictions(word, new Word(firstWord), wordRestrictions);

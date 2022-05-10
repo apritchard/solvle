@@ -27,19 +27,19 @@ public record  WordCalculationConfig (
 
     /**
      * Returns a config that minimizes the mean score without failing
-     * {2=79, 3=1142, 4=996, 5=94, 6=4}
-     *  mean: 3.4825054
-     *  std dev: 0.640076658
+     * {1=1, 2=84, 3=1129, 4=1010, 5=87, 6=4}
+     *  mean: 3.479482
+     *  std dev: 0.640661721
      *  median: 3.0
      * @return
      */
-    public static WordCalculationConfig OPTIMAL_MEAN =  new WordCalculationConfig(4, 9, false, 50, 2, .007);
+    public static WordCalculationConfig OPTIMAL_MEAN =  new WordCalculationConfig(4, 9, false, 100, 2, .007);
 
     /**
      * Returns a config guaranteed to solve any wordle in 5 or fewer guesses, at the cost of higher mean
-     *  {2=79, 3=928, 4=1164, 5=144}
-     *  mean: 3.593088553
-     *  std dev: 0.658922347
+     *  {2=79, 3=927, 4=1165, 5=144}
+     *  mean: 3.593520518
+     *  std dev: 0.65886115
      *  median: 4.0
      * @return
      */
@@ -47,9 +47,9 @@ public record  WordCalculationConfig (
 
     /**
      * Maximize the number of scores 3 and below
-     * {2=76, 3=1172, 4=943, 5=113, 6=11}
-     *  mean: 3.486393089
-     *  std dev: 0.664679133
+     * {1=1, 2=75, 3=1172, 4=943, 5=113, 6=11}
+     *  mean: 3.485961123
+     *  std dev: 0.665969227
      *  median: 3.0
      * @return
      */
@@ -57,9 +57,9 @@ public record  WordCalculationConfig (
 
     /**
      * Maximize the number of scores 4 and below
-     * {2=76, 3=1127, 4=1020, 5=88, 6=4}
-     *  mean: 3.488984881
-     *  std dev: 0.634116865
+     * {1=1, 2=75, 3=1126, 4=1022, 5=87, 6=4}
+     *  mean: 3.488552916
+     *  std dev: 0.634790355
      *  median: 3.0
      * @return
      */
@@ -67,7 +67,7 @@ public record  WordCalculationConfig (
 
     /**
      * Maximize the number of scores 2 at all cost
-     * {2=147, 3=958, 4=968, 5=214, 6=26, 7=1, 8=1}
+     * {1=1, 2=146, 3=959, 4=966, 5=214, 6=27, 7=1, 8=1}
      *  mean: 3.577105832
      *  std dev: 0.798384986
      *  median: 4.0
