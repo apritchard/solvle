@@ -72,4 +72,9 @@ public class Word implements Serializable, Comparable<Word> {
         return word.length();
     }
 
+    @Override
+    public String toString() {
+        return word;
+    }
+
 }
