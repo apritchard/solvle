@@ -23,6 +23,8 @@ public record WordRestrictions(Word word,
 
     private static int MAX_WORD_LENGTH = 9;
 
+    public static final WordRestrictions NO_RESTRICTIONS = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+
     /**
      * Creates a description of known restriction knowledge based on provided input string.
      * @param word String containing all available letters from which to guess. If a letter is followed by
@@ -72,7 +74,7 @@ public record WordRestrictions(Word word,
     }
 
     public static WordRestrictions noRestrictions() {
-        return new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+        return NO_RESTRICTIONS;
     }
 
     public static WordRestrictions generateRestrictions(Word solution, Word guess, WordRestrictions currentRestrictions) {
