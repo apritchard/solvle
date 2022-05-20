@@ -1,7 +1,6 @@
 package com.appsoil.solvle.data;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.SerializationUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,7 +69,18 @@ public record WordRestrictions(Word word,
                 });
             }
         }
+    }
 
+    /**
+     * Returns a copy of these restrictions that override the known letter positions with a new set of positions
+     * and adds those positions to the required letters list. Used to produce new requirements for a word rut.
+     * @param letterPositions
+     * @return
+     */
+    public WordRestrictions withAdditionalLetterPositions(Map<Integer, Character> letterPositions) {
+        Set<Character> newRequiredLetters = new HashSet<>(requiredLetters);
+        newRequiredLetters.addAll(letterPositions.values());
+        return new WordRestrictions(word, newRequiredLetters, letterPositions, positionExclusions);
     }
 
     public static WordRestrictions noRestrictions() {

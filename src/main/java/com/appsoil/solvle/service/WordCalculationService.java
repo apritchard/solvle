@@ -1,23 +1,37 @@
 package com.appsoil.solvle.service;
 
-import com.appsoil.solvle.data.Word;
-import com.appsoil.solvle.data.WordFrequencyScore;
-import com.appsoil.solvle.data.WordRestrictions;
+import com.appsoil.solvle.data.*;
+import com.appsoil.solvle.service.solvers.Solver;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WordCalculationService {
+
+    private static final Logger log = LogManager.getLogger(WordCalculationService.class);
 
     private final double rightLocationMultiplier;
     private final double uniquenessMultiplier;
     private final boolean useHarmonic;
     private final int permutationThreshold;
     private final double viableWordPreference;
+    private final double locationAdjustmentScale;
+    private final double uniqueAdjustmentScale;
+    private final double viableWordAdjustmentScale;
+    private final double vowelAdjustment;
+    private final double rutBreakMultiplier;
+    private final int rutBreakThreshold;
+
+    private static final Set<Character> vowels = Set.of('a', 'e', 'i', 'o', 'u');
 
     public WordCalculationService(WordCalculationConfig config) {
         this.rightLocationMultiplier = config.rightLocationMultiplier();
@@ -25,6 +39,12 @@ public class WordCalculationService {
         this.useHarmonic = config.useHarmonic();
         this.permutationThreshold = config.partitionThreshold();
         this.viableWordPreference = config.viableWordPreference();
+        this.locationAdjustmentScale = config.locationAdjustmentScale();
+        this.uniqueAdjustmentScale = config.uniqueAdjustmentScale();
+        this.viableWordAdjustmentScale = config.viableWordAdjustmentScale();
+        this.vowelAdjustment = config.vowelMultiplier();
+        this.rutBreakMultiplier = config.rutBreakMultiplier();
+        this.rutBreakThreshold = config.rutBreakThreshold();
     }
 
     /**
@@ -121,24 +141,27 @@ public class WordCalculationService {
      * @param sizeLimit Maximum number of results to return
      * @return
      */
-    public Set<WordFrequencyScore> calculateViableWords(Set<Word> words, Map<Character, LongAdder> characterCounts, int viableWordsCount, int requiredCharCount, int sizeLimit) {
+    public Set<WordFrequencyScore> calculateViableWords(Set<Word> words, Map<Character, LongAdder> characterCounts, int viableWordsCount, int requiredCharCount, int sizeLimit, Map<Character, DoubleAdder> positionBonus) {
         return words.parallelStream()
-                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(), calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount)))
+                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(),
+                        calculateFreqScore(word, characterCounts, viableWordsCount, word.getLength() - requiredCharCount, positionBonus)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
     }
 
-    public Set<WordFrequencyScore> calculateViableWordsByPosition(Set<Word> words, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int requiredCharCount, int sizeLimit, WordRestrictions wordRestrictions) {
+    public Set<WordFrequencyScore> calculateViableWordsByPosition(Set<Word> words, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords,
+                                                                  int requiredCharCount, int sizeLimit, WordRestrictions wordRestrictions, Map<Character, DoubleAdder> positionBonus) {
         return words.parallelStream()
-                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(), calculateFreqScoreByPosition(word, characterCounts, containedWords, word.getLength() - requiredCharCount, wordRestrictions)))
+                .map(word -> new WordFrequencyScore(word.getOrder(), word.word(),
+                        calculateFreqScoreByPosition(word, characterCounts, containedWords, word.getLength() - requiredCharCount, wordRestrictions, positionBonus)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
     }
 
     /**
-     * Identical to {@link #calculateViableWords(Set, Map, int, int, int)} but with the addition of a requiredLetters set.
+     * Identical to {@link #calculateViableWords(Set, Map, int, int, int, Map)} but with the addition of a requiredLetters set.
      * This set refers to letters that are required in viable words, and they will be excluded from the frequency
      * score calculation for fishing words.
      *
@@ -155,12 +178,16 @@ public class WordCalculationService {
      * @param requiredLetters
      * @return
      */
-    public Set<WordFrequencyScore> calculateFishingWords(Set<Word> allWords, Map<Character, LongAdder> characterCounts, int viableWordsCount, int sizeLimit, Set<Character> requiredLetters) {
-        return calculateViableWords(allWords, removeRequiredLettersFromCounts(characterCounts, requiredLetters), viableWordsCount, requiredLetters.size(), sizeLimit);
+    public Set<WordFrequencyScore> calculateFishingWords(Set<Word> allWords, Map<Character, LongAdder> characterCounts, int viableWordsCount, int sizeLimit, Set<Character> requiredLetters, Map<Character, DoubleAdder> positionBonus) {
+        return calculateViableWords(allWords,
+                removeRequiredLettersFromCounts(characterCounts, requiredLetters),
+                viableWordsCount, requiredLetters.size(), sizeLimit, positionBonus);
     }
 
-    public Set<WordFrequencyScore> calculateFishingWordsByPosition(Set<Word> allWords, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int sizeLimit, WordRestrictions wordRestrictions) {
-        return calculateViableWordsByPosition(allWords, removeRequiredLettersFromCountsByPosition(characterCounts, wordRestrictions), containedWords, wordRestrictions.letterPositions().keySet().size(), sizeLimit, wordRestrictions);
+    public Set<WordFrequencyScore> calculateFishingWordsByPosition(Set<Word> allWords, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords, int sizeLimit, WordRestrictions wordRestrictions, Map<Character, DoubleAdder> positionBonus) {
+        return calculateViableWordsByPosition(allWords,
+                removeRequiredLettersFromCountsByPosition(characterCounts, wordRestrictions),
+                containedWords, wordRestrictions.letterPositions().keySet().size(), sizeLimit, wordRestrictions, positionBonus);
     }
 
     /**
@@ -198,48 +225,53 @@ public class WordCalculationService {
      * @param maxScore The number of letters available for scoring. For example, if we already know 2 letters of a 5-letter word, the max score is 3
      * @return
      */
-    protected Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, int totalWords, int maxScore) {
+    protected Double calculateFreqScore(Word word, Map<Character, LongAdder> wordsWithCharacter, int totalWords, int maxScore, Map<Character, DoubleAdder> positionBonus) {
         if(totalWords < 1 || maxScore < 1) {
             return 0.0;
         }
+
         return word.letters().entrySet().stream()
-                .mapToDouble(c ->
-                        (wordsWithCharacter.containsKey(c.getKey()) ? wordsWithCharacter.get(c.getKey()).doubleValue() : 0) /
-                                ((double)totalWords * maxScore))
-                .sum();
+                .mapToDouble(c -> {
+                    double rutBreakerBonus = positionBonus.containsKey(c) ? positionBonus.get(c).doubleValue() : 0.0;
+                    double numerator =  (wordsWithCharacter.containsKey(c.getKey()) ? wordsWithCharacter.get(c.getKey()).doubleValue() : 0) + rutBreakerBonus;
+                    return numerator / ((double)totalWords * maxScore);
+                }).sum();
     }
 
     /**
      * Calculates letter frequency by position and adds additional weighting bonuses as defined by this
      * service's configuration. Return value of 1.0 represents that every letter in the word exists in the same
      * positions in every word in the set. Values greater than 1.0 may be returned as a result of bias multipliers.
-     * @param word
-     * @param wordsWithCharacter
-     * @param containedWords
-     * @param maxScore
-     * @param wordRestrictions
      * @return
      */
-    protected Double calculateFreqScoreByPosition(Word word, Map<Integer, Map<Character, LongAdder>> wordsWithCharacter, Set<Word> containedWords, int maxScore, WordRestrictions wordRestrictions) {
+    protected Double calculateFreqScoreByPosition(Word word, Map<Integer, Map<Character, LongAdder>> wordsWithCharacter,
+                                                  Set<Word> containedWords, int maxScore, WordRestrictions wordRestrictions, Map<Character, DoubleAdder> positionBonus) {
         if(containedWords.size() < 1 || maxScore < 1) {
             return 0.0;
         }
+        //scale location bonus based on number of positions known
+        double locationAdjustment = 1 - (((double)wordRestrictions.letterPositions().keySet().size() / word.getLength()) * locationAdjustmentScale);
 
+        //scale unique bonus based on number of letters remaining
+        double uniqueAdjustment = 1 - ((1 - ((double)wordRestrictions.word().getLength() / WordRestrictions.NO_RESTRICTIONS.word().getLength())) * uniqueAdjustmentScale);
         double totalScore = 0.0;
 
+        // for each position in this word (i), check to see how many points it scores based on letters in each position across all words (j)
         for(int i = 0; i < word.word().length(); i++) {
             char c = word.word().charAt(i);
+            double vowelPenalty = vowels.contains(c) ? vowelAdjustment : 1.0;
             for(int j = 0; j < word.word().length(); j++) {
-                double locationBonus = (i == j) ? rightLocationMultiplier : 1;
-                double uniqueBonus = (word.letters().get(c) < 2) && !wordRestrictions.requiredLetters().contains(c) ? uniquenessMultiplier : 1;
-                double numerator = wordsWithCharacter.get(j+1).containsKey(c) ? harmonic(wordsWithCharacter.get(j+1).get(c).intValue()): 0;
-                 totalScore += ((numerator * locationBonus * uniqueBonus)
-                         / (containedWords.size() * maxScore * rightLocationMultiplier)); //divide by max score * bonuses to normalize scores closer to 100%
+                double locationBonus = (i == j) ? 1 + (rightLocationMultiplier-1)*locationAdjustment : 1;
+                double uniqueBonus = (word.letters().get(c) < 2) && !wordRestrictions.requiredLetters().contains(c) ? 1 + (uniquenessMultiplier-1)*uniqueAdjustment : 1;
+                double rutBreakerBonus = positionBonus.containsKey(c) ? positionBonus.get(c).doubleValue() : 0.0;
+                double numerator = wordsWithCharacter.get(j+1).containsKey(c) ? harmonic(wordsWithCharacter.get(j+1).get(c).intValue()) + rutBreakerBonus: 0;
+                 totalScore += ((numerator * locationBonus * uniqueBonus * vowelPenalty))
+                         / (containedWords.size() * maxScore * rightLocationMultiplier); //divide by max score * bonuses to normalize scores closer to 100%
             }
         }
 
         if(totalScore > 0 && containedWords.contains(word)) {
-            totalScore += viableWordPreference; //tiebreaker toward potential solutions
+            totalScore += (viableWordPreference / (1 + (wordRestrictions.letterPositions().keySet().size() * viableWordAdjustmentScale))); //tiebreaker toward potential solutions
         }
 
         return totalScore;
@@ -262,15 +294,19 @@ public class WordCalculationService {
     public Set<WordFrequencyScore> calculateRemainingWords(WordRestrictions wordRestrictions, Set<Word> containedWords, Set<WordFrequencyScore> wordFrequencyScores, Set<WordFrequencyScore> fishingWords) {
         if(containedWords.size() <= permutationThreshold) {
             //get a pool of words taken from the top fishing and valid list
-            Set<Word> wordPool = Stream.of(wordFrequencyScores, fishingWords)
-                    .flatMap(Set::stream)
-                    .distinct()
-                    .map(wfs -> new Word(wfs.word(), wfs.naturalOrdering()))
-                    .collect(Collectors.toSet());
-            return wordsByRemainingGuesses(wordRestrictions, containedWords, wordPool);
+            return wordsByRemainingGuesses(wordRestrictions, containedWords, mergeWordPools(wordFrequencyScores, fishingWords));
         } else {
             return new HashSet<>();
         }
+    }
+
+    public Set<Word> mergeWordPools(Set<WordFrequencyScore> viable, Set<WordFrequencyScore> fishing) {
+        //get a pool of words taken from the top fishing and valid list
+        return Stream.of(viable, fishing)
+                .flatMap(Set::stream)
+                .distinct()
+                .map(wfs -> new Word(wfs.word(), wfs.naturalOrdering()))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -302,7 +338,7 @@ public class WordCalculationService {
         statSummary.forEach((k, v) ->
                 scores.add(new WordFrequencyScore(k.getOrder(), k.word(),
                         ((1.0 - (v.getMean() / containedWords.size()))
-                                + (containedWords.contains(k) ? viableWordPreference : 0))))); // add tiny bonus to viable words so they are prioritized
+                                + (containedWords.contains(k) ? (viableWordPreference / (1 + startingRestrictions.letterPositions().keySet().size() * viableWordAdjustmentScale)) : 0))))); // add tiny bonus to viable words so they are prioritized
         return scores;
     }
 
@@ -328,6 +364,27 @@ public class WordCalculationService {
         return stats;
     }
 
+    public Set<PlayOut> getWordsBySolveLength(Set<Word> containedWords, Set<Word> fishing, Set<Word> wordPool, Solver solver, WordRestrictions startingRestrictions, int guessNumber) {
+        log.info("Generating {} playouts with {} valid solutions for {} total playouts using restrictions {}", wordPool.size(), containedWords.size(), (wordPool.size() * containedWords.size()), startingRestrictions);
+        AtomicInteger i = new AtomicInteger(0);
+        return wordPool.stream().map(guess -> {
+            DescriptiveStatistics stats = new DescriptiveStatistics();
+            List<List<String>> failures = new ArrayList<>();
+            containedWords.forEach(solution -> {
+                List<String> r = solver.solve(solution, containedWords, fishing, guess, startingRestrictions);
+                stats.addValue(r.size());
+                if(r.size() > (6 - guessNumber)) {
+                    failures.add(r);
+                }
+            });
+            var countMap = Arrays.stream(stats.getSortedValues()).mapToInt(num -> (int) num).boxed().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            if(i.incrementAndGet() % 10 == 0) {
+                log.info("Completed " + i.get() + "/" + wordPool.size() + " playouts");
+            }
+            return new PlayOut(guess.word(), stats.getMean(), countMap.toString(), failures);
+        }).collect(Collectors.toCollection(() -> new TreeSet<>()));
+    }
+
     /**
      * Returns the nth value of the harmonic series. Used to lower
      * the importance of prioritizing letter frequency in favor
@@ -345,5 +402,85 @@ public class WordCalculationService {
         }
         return sum;
     }
+
+    /**
+     *
+     * @param wordList
+     * @return
+     */
+    public SharedPositions findSharedWordRestrictions(Set<Word> wordList) {
+
+        Word[] words = new Word[wordList.size()];
+        words = wordList.toArray(words);
+
+        Map<KnownPosition, Set<Word>> knownPositions = new HashMap<>();
+
+        for(int i = 0; i < words.length; i++) {
+            for(int j = i; j < words.length; j++) {
+                Word w1 = words[i];
+                Word w2 = words[j];
+                Map<Integer, Character> sharedPositions = findSharedPositions(w1, w2);
+                if(sharedPositions.isEmpty() || sharedPositions.keySet().size() < 3 || sharedPositions.keySet().size() == w1.getLength()) {
+                    continue; //don't bother saving all the tiny matches or cases where the only match is the full word
+                }
+                KnownPosition knownPosition = new KnownPosition(sharedPositions);
+                knownPositions.computeIfAbsent(knownPosition, k-> new HashSet<>()).addAll(List.of(w1, w2));
+            }
+        }
+        return new SharedPositions(knownPositions);
+    }
+
+    /**
+     * Returns a 1-based map of letter position to shared character. For example
+     * if the words are ROWER and TONER, the result is {2='O', 4='E', 5='R'}
+     * @param w1
+     * @param w2
+     * @return
+     */
+    private Map<Integer, Character> findSharedPositions(Word w1, Word w2) {
+
+        Map<Integer, Character> knownPositions = new HashMap<>();
+        for(int i = 0; i < w1.getLength(); i++) {
+            if(w1.word().charAt(i) == w2.word().charAt(i)) {
+                knownPositions.put(i+1, w1.word().charAt(i));
+            }
+        }
+        return knownPositions;
+    }
+
+    /**
+     * Generates a set of weights for characters that are used to differentiate between words in common
+     * sets of similar words. For example, EIGHT/LIGHT/SIGHT/TIGHT would apply bonus weight to E, L, and S
+     * (but not T, because we already know that is part of the set).
+     * @param sharedPositions All the shared positions available for this set of restrictions
+     * @param wordRestrictions Word restrictions (used to exclude bonuses for letters we already know)
+     * @return
+     */
+    public Map<Character, DoubleAdder> generateSharedCharacterWeights(SharedPositions sharedPositions, WordRestrictions wordRestrictions) {
+
+        Map<Character, DoubleAdder> result = new ConcurrentHashMap<>();
+
+        sharedPositions.knownPositions().forEach((kp, wordSet) -> {
+            //sets with more words are weighted more heavily
+            if(wordSet.size() < rutBreakThreshold) {
+                return;
+            }
+            double multFactor = ((double)wordSet.size() / sharedPositions.largestSet()) * rutBreakMultiplier;
+            calculateCharacterCountsByPosition(wordSet).forEach((position, charMap) ->{
+                // if the knownPosition doesn't have any value for this position, that means we still need to know it
+                //   so add the number of characters to the result
+                if(!kp.pos().containsKey(position)) {
+                    charMap.forEach((c, amt) -> {
+                        // only add bonuses to letters we don't know
+                        if(!wordRestrictions.requiredLetters().contains(c) && !kp.pos().containsValue(c)) {
+                            result.computeIfAbsent(c, k -> new DoubleAdder()).add(amt.longValue() * multFactor);
+                        }
+                    });
+                }
+            });
+        });
+        return result;
+    }
+
 
 }

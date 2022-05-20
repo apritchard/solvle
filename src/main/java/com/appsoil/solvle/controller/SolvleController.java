@@ -1,5 +1,6 @@
 package com.appsoil.solvle.controller;
 
+import com.appsoil.solvle.data.PlayOut;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.service.SolvleService;
 import com.appsoil.solvle.service.WordCalculationConfig;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -29,23 +31,32 @@ public class SolvleController {
         this.solvleService = solvleService;
     }
 
-    @CrossOrigin
     @GetMapping("/{wordRestrictions}")
-    public SolvleDTO getValidWords(@PathVariable String wordRestrictions,
-                                   @RequestParam(defaultValue= "5") int wordLength,
-                                   @RequestParam(defaultValue = "simple") String wordList,
-                                   @RequestParam(defaultValue = "4") double rightLocationMultiplier,
-                                   @RequestParam(defaultValue = "9") double uniquenessMultiplier,
-                                   @RequestParam(defaultValue = ".007") double viableWordPreference,
-                                   @RequestParam(defaultValue = "50") int partitionThreshold
+    public SolvleDTO getWordAnalysis(@PathVariable String wordRestrictions,
+                                     @RequestParam(defaultValue= "5") int wordLength,
+                                     @RequestParam(defaultValue = "simple") String wordList,
+                                     @RequestParam(defaultValue = "1") double rightLocationMultiplier,
+                                     @RequestParam(defaultValue = "1") double uniquenessMultiplier,
+                                     @RequestParam(defaultValue = "0.0") double viableWordPreference,
+                                     @RequestParam(defaultValue = "0") double locationAdjustmentScale,
+                                     @RequestParam(defaultValue = "0") double uniqueAdjustmentScale,
+                                     @RequestParam(defaultValue = "0") double viableWordAdjustmentScale,
+                                     @RequestParam(defaultValue = "1") double vowelMultiplier,
+                                     @RequestParam(defaultValue = "0") double rutBreakMultiplier,
+                                     @RequestParam(defaultValue = "0") int rutBreakThreshold,
+                                     @RequestParam(defaultValue = "50") int partitionThreshold,
+                                     @RequestParam(defaultValue = "false") boolean hardMode
                                    ) {
 
 
         logRequestsCount();
-        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
-                false, Math.min(partitionThreshold, MAX_PARTITION), 2, viableWordPreference);
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Valid words requested with configuration {}", wordCalculationConfig);
-        SolvleDTO result = solvleService.getValidWords(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
+        SolvleDTO result = solvleService.getWordAnalysis(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
     }
 
@@ -53,32 +64,84 @@ public class SolvleController {
     public WordScoreDTO getWordScore(@PathVariable String wordRestrictions,
                                      @PathVariable String wordToScore,
                                      @RequestParam(defaultValue = "simple") String wordList,
-                                     @RequestParam(defaultValue = "4") double rightLocationMultiplier,
-                                     @RequestParam(defaultValue = "9") double uniquenessMultiplier,
-                                     @RequestParam(defaultValue = ".007") double viableWordPreference,
-                                     @RequestParam(defaultValue = "50") int partitionThreshold) {
+                                     @RequestParam(defaultValue = "1") double rightLocationMultiplier,
+                                     @RequestParam(defaultValue = "1") double uniquenessMultiplier,
+                                     @RequestParam(defaultValue = "0.0") double viableWordPreference,
+                                     @RequestParam(defaultValue = "0") double locationAdjustmentScale,
+                                     @RequestParam(defaultValue = "0") double uniqueAdjustmentScale,
+                                     @RequestParam(defaultValue = "0") double viableWordAdjustmentScale,
+                                     @RequestParam(defaultValue = "1") double vowelMultiplier,
+                                     @RequestParam(defaultValue = "0") double rutBreakMultiplier,
+                                     @RequestParam(defaultValue = "0") int rutBreakThreshold,
+                                     @RequestParam(defaultValue = "50") int partitionThreshold,
+                                     @RequestParam(defaultValue = "false") boolean hardMode
+                                     ) {
         logRequestsCount();
-        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
-                false, Math.min(partitionThreshold, MAX_PARTITION), 2, viableWordPreference);
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
         WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore.toLowerCase(), wordList, wordCalculationConfig);
+        return result;
+    }
+
+    @GetMapping("/{wordRestrictions}/playout")
+    public Set<PlayOut> playOutSolution(@PathVariable String wordRestrictions,
+                                        @RequestParam(defaultValue= "5") int wordLength,
+                                        @RequestParam(defaultValue = "simple") String wordList,
+                                        @RequestParam(defaultValue = "1") double rightLocationMultiplier,
+                                        @RequestParam(defaultValue = "1") double uniquenessMultiplier,
+                                        @RequestParam(defaultValue = "0.0") double viableWordPreference,
+                                        @RequestParam(defaultValue = "0") double locationAdjustmentScale,
+                                        @RequestParam(defaultValue = "0") double uniqueAdjustmentScale,
+                                        @RequestParam(defaultValue = "0") double viableWordAdjustmentScale,
+                                        @RequestParam(defaultValue = "1") double vowelMultiplier,
+                                        @RequestParam(defaultValue = "0") double rutBreakMultiplier,
+                                        @RequestParam(defaultValue = "0") int rutBreakThreshold,
+                                        @RequestParam(defaultValue = "50") int partitionThreshold,
+                                        @RequestParam(defaultValue = "false") boolean hardMode,
+                                        @RequestParam(defaultValue = "0") int guess
+    ) {
+
+
+        logRequestsCount();
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
+        log.info("Playout requested with configuration {}", wordCalculationConfig);
+        Set<PlayOut> result = solvleService.playOutSolutions(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig, guess);
         return result;
     }
 
     @GetMapping("/solve/{solution}")
     public List<String> solvePuzzle(@PathVariable String solution,
                                     @RequestParam(defaultValue = "") String firstWord,
-                                    @RequestParam(defaultValue = "4") double rightLocationMultiplier,
-                                    @RequestParam(defaultValue = "9") double uniquenessMultiplier,
-                                    @RequestParam(defaultValue = ".007") double viableWordPreference,
-                                    @RequestParam(defaultValue = "50") int partitionThreshold
+                                    @RequestParam(defaultValue = "simple") String wordList,
+                                    @RequestParam(defaultValue = "1") double rightLocationMultiplier,
+                                    @RequestParam(defaultValue = "1") double uniquenessMultiplier,
+                                    @RequestParam(defaultValue = "0.0") double viableWordPreference,
+                                    @RequestParam(defaultValue = "0") double locationAdjustmentScale,
+                                    @RequestParam(defaultValue = "0") double uniqueAdjustmentScale,
+                                    @RequestParam(defaultValue = "0") double viableWordAdjustmentScale,
+                                    @RequestParam(defaultValue = "1") double vowelMultiplier,
+                                    @RequestParam(defaultValue = "0") double rutBreakMultiplier,
+                                    @RequestParam(defaultValue = "0") int rutBreakThreshold,
+                                    @RequestParam(defaultValue = "50") int partitionThreshold,
+                                    @RequestParam(defaultValue = "false") boolean hardMode
                                     ) {
         logRequestsCount();
-        WordCalculationConfig wordCalculationConfig = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier,
-                false, partitionThreshold, 2, viableWordPreference);
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Solution requested for [{}] with first word [{}] and configuration {}", solution, firstWord, wordCalculationConfig);
         Solver solver = new RemainingSolver(solvleService, wordCalculationConfig);
-        return solvleService.solveWord(solver, new Word(solution.toLowerCase()), firstWord.toLowerCase());
+        return solvleService.solveWord(solver, new Word(solution.toLowerCase()), firstWord.toLowerCase(), wordList);
     }
 
     private static void logRequestsCount() {

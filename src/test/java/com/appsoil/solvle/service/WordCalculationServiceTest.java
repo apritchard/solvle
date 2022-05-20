@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
@@ -46,7 +47,7 @@ public class WordCalculationServiceTest {
         Map<Character, LongAdder> counts = wordCalculationService.calculateCharacterCounts(Set.of(new Word(sourceWord)));
         Set<Word> viableWords = Set.of(new Word(viableWord));
 
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateViableWords(viableWords, counts, 1, 0, 100);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateViableWords(viableWords, counts, 1, 0, 100, new HashMap<>());
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
     }
@@ -63,7 +64,7 @@ public class WordCalculationServiceTest {
         Map<Character, LongAdder> counts = wordCalculationService.calculateCharacterCounts(Set.of(new Word(sourceWord)));
         Set<Word> viableWords = Set.of(new Word(viableWord));
 
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWords(viableWords, counts, 1, 100, Set.of(requiredChar));
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWords(viableWords, counts, 1, 100, Set.of(requiredChar), new HashMap<>());
 
         Assertions.assertEquals(score, scores.stream().findFirst().get().freqScore());
     }
@@ -84,7 +85,7 @@ public class WordCalculationServiceTest {
         //
 
         var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions, new HashMap<>());
 
         Set<String> expected = Set.of("CD", "DC");
 
@@ -99,7 +100,7 @@ public class WordCalculationServiceTest {
         WordRestrictions restrictions = new WordRestrictions("BE4!5FGHJKMO2PQR5UVXYZ".toLowerCase());
 
         var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions, new HashMap<>());
 
         System.out.println(scores.toString());
     }
@@ -111,7 +112,7 @@ public class WordCalculationServiceTest {
         WordRestrictions restrictions = new WordRestrictions("BE4!5FGHJKMO2PQR5!4UVXZ".toLowerCase());
 
         var characterCounts = wordCalculationService.calculateCharacterCountsByPosition(viableWords);
-        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions);
+        Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions, new HashMap<>());
 
         System.out.println(scores.toString());
     }

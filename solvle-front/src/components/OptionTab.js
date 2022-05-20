@@ -1,6 +1,6 @@
 import React from 'react';
 
-function OptionTab({wordList, onSelectWord, heading, headingTitle}) {
+function OptionTab({wordList, onSelectWord, heading}) {
     return (
         <div>
             <div>{heading}</div>

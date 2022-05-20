@@ -153,6 +153,10 @@ nav h1 {
   background-image: linear-gradient(#72ad6e, #d4bf59);
 }
 
+.rutHeader {
+  text-align: center;
+}
+
 .nav-link {
   color: #d4bf59;
   background-color: #121212;

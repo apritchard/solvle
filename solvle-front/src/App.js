@@ -39,16 +39,25 @@ function App() {
                 wordLength: width,
                 attempts: rows,
                 results: 50,
+                hardMode: localStorage.getItem("hardMode") === 'true',
                 useBias: localStorage.getItem("useBias") === 'true',
+                useFineTuning: localStorage.getItem("useFineTuning") === 'true',
                 usePartitioning: localStorage.getItem("usePartitioning") === 'true',
+                useRutBreaking: localStorage.getItem("useRutBreaking") === 'true',
                 rateEnteredWords: localStorage.getItem("rateEnteredWords") === 'true',
                 calculationConfig: {
-                    rightLocationMultiplier: localStorage.getItem("rightLocationMultiplier") || 4,
-                    uniquenessMultiplier: localStorage.getItem("uniquenessMultiplier") || 9,
+                    rightLocationMultiplier: localStorage.getItem("rightLocationMultiplier") || 3,
+                    uniquenessMultiplier: localStorage.getItem("uniquenessMultiplier") || 8,
                     useHarmonic: false,
                     partitionThreshold: localStorage.getItem("partitionThreshold") !== null ? localStorage.getItem("partitionThreshold") : 30,
                     fishingThreshold: 2,
-                    viableWordPreference: localStorage.getItem("viableWordPreference") !== null ? localStorage.getItem("viableWordPreference") : .007
+                    viableWordPreference: localStorage.getItem("viableWordPreference") !== null ? localStorage.getItem("viableWordPreference") : .007,
+                    locationAdjustmentScale: localStorage.getItem("locationAdjustmentScale") || 0,
+                    uniqueAdjustmentScale: localStorage.getItem("uniqueAdjustmentScale") || 0,
+                    viableWordAdjustmentScale: localStorage.getItem("viableWordAdjustmentScale") || 0,
+                    vowelMultiplier: localStorage.getItem("vowelMultiplier") || 1,
+                    rutBreakMultiplier: localStorage.getItem("rutBreakMultiplier") || 0,
+                    rutBreakThreshold: localStorage.getItem("rutBreakThreshold") || 6,
                 }
             },
             shouldUpdate: false
@@ -84,6 +93,7 @@ function App() {
             bestWords: new Set(),
             wordsWithCharacter: new Map(),
             totalWords: 0,
+            knownPositions: new Set()
         }
     }
 

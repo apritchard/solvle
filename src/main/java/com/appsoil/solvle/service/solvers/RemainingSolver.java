@@ -29,20 +29,35 @@ public class RemainingSolver implements Solver {
 
     @Override
     public List<String> solve(Word word, Set<Word> viable, Set<Word> fishing, String firstWord) {
-        WordRestrictions wordRestrictions = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+        return solve(word, viable, fishing, new Word(firstWord), WordRestrictions.noRestrictions());
+    }
+
+    @Override
+    public List<String> solve(Word word, Set<Word> viable, Set<Word> fishing, Word firstWord, WordRestrictions wordRestrictions) {
+
+        if(word.equals(firstWord)) {
+            return List.of(firstWord.word());
+        }
+        if(firstWord != null && firstWord.word().length() == word.word().length()) {
+            List<String> solution = new ArrayList<>();
+            solution.add(firstWord.word());
+            wordRestrictions = WordRestrictions.generateRestrictions(word, firstWord, wordRestrictions);
+            solution.addAll(solve(word, viable, fishing, wordRestrictions));
+            return solution;
+        } else {
+            return solve(word, viable, fishing, wordRestrictions);
+        }
+
+    }
+
+
+    @Override
+    public List<String> solve(Word word, Set<Word> viable, Set<Word> fishing, WordRestrictions wordRestrictions) {
         List<String> solution = new ArrayList<>();
 
-        if(word.word().equals(firstWord)) {
-            return List.of(firstWord);
-        }
-
-        if(firstWord != null && firstWord.length() == word.word().length()) {
-            solution.add(firstWord);
-            wordRestrictions = WordRestrictions.generateRestrictions(word, new Word(firstWord), wordRestrictions);
-        }
 
         //get the first guess
-        SolvleDTO guess = solvleService.getValidWords(wordRestrictions, viable, fishing, config);
+        SolvleDTO guess = solvleService.getWordAnalysis(wordRestrictions, viable, fishing, config);
 
         // start by fishing until we are below the partition threshold
         while(guess.totalWords() > config.partitionThreshold() && guess.totalWords() > config.fishingThreshold()) {
@@ -62,7 +77,7 @@ public class RemainingSolver implements Solver {
 
             //generate new restrictions and try again
             wordRestrictions = WordRestrictions.generateRestrictions(word, new Word(currentGuess.word(), currentGuess.naturalOrdering()), wordRestrictions);
-            guess = solvleService.getValidWords(wordRestrictions, viable, fishing, config);
+            guess = solvleService.getWordAnalysis(wordRestrictions, viable, fishing, config);
         }
 
         // partition until we are below the fishing threshold as long as there are words in the partition set
@@ -78,7 +93,7 @@ public class RemainingSolver implements Solver {
                 return solution;
             }
             wordRestrictions = WordRestrictions.generateRestrictions(word, new Word(currentGuess.word(), currentGuess.naturalOrdering()), wordRestrictions);
-            guess = solvleService.getValidWords(wordRestrictions, viable, fishing, config);
+            guess = solvleService.getWordAnalysis(wordRestrictions, viable, fishing, config);
         }
 
         // pick out of the viable set
@@ -92,7 +107,7 @@ public class RemainingSolver implements Solver {
 
             //generate new restrictions and try again
             wordRestrictions = WordRestrictions.generateRestrictions(word, new Word(currentGuess.word(), currentGuess.naturalOrdering()), wordRestrictions);
-            guess = solvleService.getValidWords(wordRestrictions, viable, fishing, config);
+            guess = solvleService.getWordAnalysis(wordRestrictions, viable, fishing, config);
         }
 
         throw new IllegalStateException("Failed to find word " + word.word());
