@@ -39,6 +39,7 @@ function App() {
                 wordLength: width,
                 attempts: rows,
                 results: 50,
+                autoColorWord: "",
                 hardMode: localStorage.getItem("hardMode") === 'true',
                 useBias: localStorage.getItem("useBias") === 'true',
                 useFineTuning: localStorage.getItem("useFineTuning") === 'true',
@@ -105,11 +106,15 @@ function App() {
     const [solverOpen, setSolverOpen] = useState(false);
     const [rowScores, setRowScores] = useState([])
 
-    const resetBoard = (rows, width) => {
-        setBoardState(initialBoardState(rows, width));
+    const resetLetterInfo = (width) => {
         setAvailableLetters(initialAvailableLetters());
         setUnsureLetters(initialUnsureLetters(width))
         setKnownLetters(initialKnownLetters(width));
+    }
+
+    const resetBoard = (rows, width) => {
+        setBoardState(initialBoardState(rows, width));
+        resetLetterInfo(width);
         setCurrentOptions(initialOptions());
         setRowScores([]);
     }
@@ -155,6 +160,18 @@ function App() {
         setUnsureLetters(initialUnsureLetters(boardState.settings.wordLength))
         setKnownLetters(initialKnownLetters(boardState.settings.wordLength));
 
+    }
+
+    const setAutoColorSolution = (solution) => {
+        setBoardState(prev => ({
+            ...prev,
+            settings: {
+                ...prev.settings,
+                autoColorWord: solution
+            }
+        }));
+        resetLetterInfo(boardState.settings.wordLength);
+        colorAllWordsBasedOnSolution(solution);
     }
 
     const clearPosition = (attempt, pos, replacementLetter) => {
@@ -204,7 +221,6 @@ function App() {
             let configParams = generateConfigParams(boardState);
 
             let currentWord = "";
-            console.log(boardState.board[boardState.currAttempt.attempt]);
             boardState.board[boardState.currAttempt.attempt].map(letter => {currentWord+= letter});
 
             fetch('/solvle/' + restrictionString + "/" + currentWord + "?wordList=" + dictionary + configParams)
@@ -217,12 +233,42 @@ function App() {
         }
     }
 
+    const colorCurrentWordBasedOnSolution = () => {
+        colorWordBasedOnSolution(boardState.currAttempt.attempt, boardState.settings.autoColorWord);
+    }
+
+    const colorAllWordsBasedOnSolution = (solution) => {
+        for(let i = 0; i < boardState.currAttempt.attempt; i++) {
+            colorWordBasedOnSolution(i, solution);
+        }
+    }
+
+    const colorWordBasedOnSolution = (attempt, solution) => {
+        solution = solution.toUpperCase()
+        console.log("Coloring attempt " + attempt + " for " + solution);
+        if(solution) {
+            boardState.board[attempt].map((letter, idx) => {
+                if(solution.charAt(idx) == letter) {
+                    console.log("adding " + letter + " known for " + idx);
+                    addKnownLetter(idx, letter);
+                } else if (solution.includes(letter)) {
+                    console.log("adding " + letter + " unsure for " + idx);
+                    addUnsureLetter(idx, letter);
+                } else {
+                    console.log("removing available " + letter);
+                    removeAvailableLetter(letter);
+                }
+            });
+        }
+    }
+
     const onEnter = () => {
         if (boardState.currAttempt.letter !== boardState.settings.wordLength) {
             return;
         }
         console.log("Updating board state");
         updateWordRating();
+        colorCurrentWordBasedOnSolution();
         setBoardState(prev => ({
             ...prev,
             board: prev.board,
@@ -231,6 +277,7 @@ function App() {
                 letter: 0
             }
         }));
+
     };
 
     const onDelete = () => {
@@ -288,6 +335,7 @@ function App() {
             newBoard[boardState.currAttempt.attempt][i] = word[i];
         }
         updateWordRating();
+        colorCurrentWordBasedOnSolution();
         setBoardState(prev => ({
             ...prev,
             board: newBoard,
@@ -338,7 +386,8 @@ function App() {
                 removeAvailableLetter,
                 setAllUnavailable,
                 onSelectWord,
-                resetBoard
+                resetBoard,
+                setAutoColorSolution
             }}
         >
             <div className="App">

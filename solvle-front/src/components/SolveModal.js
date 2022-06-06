@@ -16,10 +16,14 @@ function SolveModal(props) {
     const [guesses, setGuesses] = useState([]);
 
 
+    const [modalOpen, setModalOpen] = useState(false);
+
     const handleShow = () => {
+        setModalOpen(true);
         setSolverOpen(true);
     }
     const handleClose = () => {
+        setModalOpen(false);
         setSolverOpen(false);
     }
 
@@ -47,7 +51,7 @@ function SolveModal(props) {
             <Button title="Show Solvle's solution for a specific word" variant="info"
                     onClick={handleShow}>Solve Word</Button>
 
-            <Modal className="solveModal" show={solverOpen} onHide={handleClose} >
+            <Modal className="solveModal" show={modalOpen} onHide={handleClose} >
                 <Modal.Header closeButton>
                     <Modal.Title>Solve Word</Modal.Title>
                 </Modal.Header>
