@@ -23,7 +23,6 @@ function Options(props) {
     useEffect(() => {
         setLoading(true);
 
-        console.log("Building RestrictionString")
         console.log("Available letters: " + [...availableLetters]);
 
         let restrictionString = generateRestrictionString(availableLetters, knownLetters, unsureLetters);
@@ -33,16 +32,29 @@ function Options(props) {
         let configParams = generateConfigParams(boardState);
 
         fetch('/solvle/' + restrictionString + "?wordLength=" + boardState.settings.wordLength + "&wordList=" + dictionary + configParams)
-            .then(res => res.json())
-            .then((data) => {
-                if(data.restrictionString !== restrictionString) {
-                    console.log("Received old data, disregarding");
-                    return;
+            .then(res => {
+                if (res.ok) {
+                    return res.json()
                 }
+                throw new Error(res.statusMessage);
+            })
+            .then((data) => {
+                console.log("options received:")
                 console.log(data);
                 setCurrentOptions(data);
                 setLoading(false);
-            });
+            }).catch((e) => {
+                console.log("Error retrieving options for " + restrictionString);
+                setCurrentOptions({
+                    wordList: [{naturalOrdering: 1, word: 'An Error Has Occurred', freqScore: 0.00}],
+                    fishingWords: [{naturalOrdering: 1, word: 'An Error Has Occurred', freqScore: 0.00}],
+                    bestWords: [{naturalOrdering: 1, word: 'An Error Has Occurred', freqScore: 0.00}],
+                    wordsWithCharacter: new Map(),
+                    totalWords: 0,
+                    knownPositions: new Set()
+                });
+                setLoading(false);
+        });
     }, [setCurrentOptions, boardState.settings.wordLength, boardState.settings.useBias, boardState.settings.usePartitioning, boardState.shouldUpdate,
         availableLetters, knownLetters, unsureLetters, dictionary]);
 

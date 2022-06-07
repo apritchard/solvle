@@ -224,12 +224,19 @@ function App() {
             boardState.board[boardState.currAttempt.attempt].map(letter => {currentWord+= letter});
 
             fetch('/solvle/' + restrictionString + "/" + currentWord + "?wordList=" + dictionary + configParams)
-                .then(res => res.json())
+                .then(res => {
+                    if (res.ok) {
+                        return res.json()
+                    }
+                    throw new Error(res.statusMessage);
+                })
                 .then((data) => {
                     let newRowScores = rowScores;
                     newRowScores[boardState.currAttempt.attempt] = data;
                     setRowScores([...newRowScores]);
-                });
+                }).catch(e => {
+                    console.log("Error loading word score for " + currentWord);
+            });
         }
     }
 
@@ -314,6 +321,10 @@ function App() {
     };
 
     const onSelectLetter = (key) => {
+        if(boardState.currAttempt.letter >= boardState.settings.wordLength) {
+            console.log("No room for new letters");
+            return;
+        }
         const newBoard = [...boardState.board];
         newBoard[boardState.currAttempt.attempt][boardState.currAttempt.letter] = key;
         let newLetter = Math.min(boardState.currAttempt.letter + 1, boardState.settings.wordLength);
@@ -328,7 +339,11 @@ function App() {
     };
 
     const onSelectWord = (word) => {
-        console.log("Setting " + word + word.length + " " + boardState.currAttempt.attempt + boardState.currAttempt.letter);
+        if(boardState.currAttempt.attempt >= boardState.settings.attempts) {
+            console.log("No room for more words");
+            return;
+        }
+        console.log("Setting " + word + " " + word.length + " " + boardState.currAttempt.attempt + " " + boardState.currAttempt.letter);
         const newBoard = [...boardState.board];
         for (let i = 0; i < word.length; i++) {
             clearPosition(boardState.currAttempt.attempt, i, word[i]);
@@ -340,7 +355,7 @@ function App() {
             ...prev,
             board: newBoard,
             currAttempt: {
-                attempt: Math.min(boardState.currAttempt.attempt + 1, boardState.settings.attempts-1),
+                attempt: Math.min(boardState.currAttempt.attempt + 1, boardState.settings.attempts),
                 letter: 0
             }
         }));

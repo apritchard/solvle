@@ -13,7 +13,7 @@ function Row({attempt}) {
         letters.push(<Letter key={"letter" + i + boardState.currAttempt.attempt} letterPos={i} attemptVal={attempt}/>);
     }
     if(boardState.settings.rateEnteredWords === true) {
-        letters.push(<RowScore rowNumber={attempt} />);
+        letters.push(<RowScore key={"rowScore" + attempt} rowNumber={attempt} />);
     }
 
     return (

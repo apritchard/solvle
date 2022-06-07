@@ -42,7 +42,7 @@ function AutoColor(props) {
         setSolution(e.target.value);
     }
 
-    console.log("Valid is " + valid);
+    console.log("Auto-color solution is valid or empty:" + valid);
 
     let buttonText = !valid ? "Invalid Solution" : boardState.settings.autoColorWord ? "Solution: " + boardState.settings.autoColorWord : "Set Solution";
 
