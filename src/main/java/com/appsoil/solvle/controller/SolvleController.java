@@ -9,10 +9,10 @@ import com.appsoil.solvle.service.solvers.Solver;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -49,7 +49,8 @@ public class SolvleController {
                                                @RequestParam(defaultValue = "false") boolean hardMode
                                    ) {
 
-        logRequestsCount();
+        LocalDateTime start = LocalDateTime.now();
+        logRequestsCount(start);
         WordCalculationConfig wordCalculationConfig =
                 new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
                         .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
@@ -57,6 +58,7 @@ public class SolvleController {
                         .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Valid words requested with configuration {}", wordCalculationConfig);
         SolvleDTO result = solvleService.getWordAnalysis(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
+        log.info("Valid words for {} took {}", wordRestrictions, Duration.between(start, LocalDateTime.now()));
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
     }
 
@@ -76,7 +78,8 @@ public class SolvleController {
                                      @RequestParam(defaultValue = "50") int partitionThreshold,
                                      @RequestParam(defaultValue = "false") boolean hardMode
                                      ) {
-        logRequestsCount();
+        LocalDateTime start = LocalDateTime.now();
+        logRequestsCount(start);
         WordCalculationConfig wordCalculationConfig =
                 new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
                         .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
@@ -84,6 +87,8 @@ public class SolvleController {
                         .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
         WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore.toLowerCase(), wordList, wordCalculationConfig);
+        log.info("Word Score for {} took {}", wordToScore, Duration.between(start, LocalDateTime.now()));
+
         return result;
     }
 
@@ -144,12 +149,16 @@ public class SolvleController {
         return solvleService.solveWord(solver, new Word(solution.toLowerCase()), firstWord.toLowerCase(), wordList);
     }
 
-    private static void logRequestsCount() {
-        LocalDateTime now = LocalDateTime.now();
+    private void logRequestsCount() {
+        logRequestsCount(LocalDateTime.now());
+    }
+
+    private static synchronized void logRequestsCount(LocalDateTime now) {
         if (requestsSinceLoading++ % 1000 == 0 || MINUTES.between(lastRequestLogTime, now) > 29) {
             double requestPerHour = (double) requestsSinceLoading * 60 / (double) MINUTES.between(startTime, now);
             log.info("{} requests made since {} ({} per hour)", requestsSinceLoading, startTime, requestPerHour);
             lastRequestLogTime = now;
         }
     }
+
 }
