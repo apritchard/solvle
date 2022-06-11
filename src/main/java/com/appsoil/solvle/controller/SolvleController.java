@@ -33,7 +33,7 @@ public class SolvleController {
     }
 
     @GetMapping("/{wordRestrictions}")
-    public Callable<SolvleDTO> getWordAnalysis(@PathVariable String wordRestrictions,
+    public SolvleDTO getWordAnalysis(@PathVariable String wordRestrictions,
                                                @RequestParam(defaultValue= "5") int wordLength,
                                                @RequestParam(defaultValue = "simple") String wordList,
                                                @RequestParam(defaultValue = "1") double rightLocationMultiplier,
@@ -49,21 +49,19 @@ public class SolvleController {
                                                @RequestParam(defaultValue = "false") boolean hardMode
                                    ) {
 
-        return () -> {
-            logRequestsCount();
-            WordCalculationConfig wordCalculationConfig =
-                    new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
-                            .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
-                            .withHardMode(hardMode)
-                            .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
-            log.info("Valid words requested with configuration {}", wordCalculationConfig);
-            SolvleDTO result = solvleService.getWordAnalysis(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
-            return SolvleDTO.appendRestrictionString(wordRestrictions, result);
-        };
+        logRequestsCount();
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
+        log.info("Valid words requested with configuration {}", wordCalculationConfig);
+        SolvleDTO result = solvleService.getWordAnalysis(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
+        return SolvleDTO.appendRestrictionString(wordRestrictions, result);
     }
 
     @GetMapping("/{wordRestrictions}/{wordToScore}")
-    public Callable<WordScoreDTO> getWordScore(@PathVariable String wordRestrictions,
+    public WordScoreDTO getWordScore(@PathVariable String wordRestrictions,
                                      @PathVariable String wordToScore,
                                      @RequestParam(defaultValue = "simple") String wordList,
                                      @RequestParam(defaultValue = "1") double rightLocationMultiplier,
@@ -78,17 +76,15 @@ public class SolvleController {
                                      @RequestParam(defaultValue = "50") int partitionThreshold,
                                      @RequestParam(defaultValue = "false") boolean hardMode
                                      ) {
-        return () -> {
-            logRequestsCount();
-            WordCalculationConfig wordCalculationConfig =
-                    new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
-                            .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
-                            .withHardMode(hardMode)
-                            .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
-            log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
-            WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore.toLowerCase(), wordList, wordCalculationConfig);
-            return result;
-        };
+        logRequestsCount();
+        WordCalculationConfig wordCalculationConfig =
+                new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, Math.min(partitionThreshold, MAX_PARTITION), viableWordPreference)
+                        .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
+                        .withHardMode(hardMode)
+                        .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
+        log.info("Word Score requested for {} with configuration {}", wordToScore, wordCalculationConfig);
+        WordScoreDTO result = solvleService.getScore(wordRestrictions.toLowerCase(), wordToScore.toLowerCase(), wordList, wordCalculationConfig);
+        return result;
     }
 
     @GetMapping("/{wordRestrictions}/playout")
