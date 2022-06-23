@@ -25,6 +25,20 @@ export function generateRestrictionString(availableLetters, knownLetters, unsure
     return restrictionString;
 }
 
+export function generateAnagramString(board) {
+    let anagramString = "";
+
+    for(let i = 0; i < board.length ; i++) {
+        for(let j = 0; j < board[i].length; j++) {
+            if(board[i][j] !== '') {
+                anagramString += board[i][j];
+            }
+        }
+    }
+
+    return anagramString;
+}
+
 export function generateConfigParams(boardState) {
     let hardMode = boardState.settings.hardMode ?
         "&hardMode=true" : "&hardMode=false";

@@ -201,7 +201,7 @@ public class FullDictionaryTest {
 
     @Test
     public void compareStandardConfigs() {
-        String firstWord = "";
+        String firstWord = "relay";
         WordCalculationConfig.DEFAULT_CONFIGS.forEach((name, config) -> {
             log.info("Running " + name);
             addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "simple"));

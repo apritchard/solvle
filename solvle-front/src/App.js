@@ -14,6 +14,7 @@ import Config from "./components/Config";
 import AppContext from "./contexts/contexts";
 import BoardActions from "./components/BoardActions";
 import {generateConfigParams, generateRestrictionString} from "./functions/functions";
+import AnagramOptions from "./components/AnagramOptions";
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
                 usePartitioning: localStorage.getItem("usePartitioning") === 'true',
                 useRutBreaking: localStorage.getItem("useRutBreaking") === 'true',
                 rateEnteredWords: localStorage.getItem("rateEnteredWords") === 'true',
+                anagramMode: localStorage.getItem("anagramMode") === 'true',
                 calculationConfig: {
                     rightLocationMultiplier: localStorage.getItem("rightLocationMultiplier") || 3,
                     uniquenessMultiplier: localStorage.getItem("uniquenessMultiplier") || 8,
@@ -426,7 +428,7 @@ function App() {
                     <BoardActions />
                     <div className="parent">
                         <Board/>
-                        <Options/>
+                        {boardState.settings.anagramMode ? <AnagramOptions/> : <Options/>}
                     </div>
                     <Keyboard/>
                 </div>

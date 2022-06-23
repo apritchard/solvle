@@ -5,4 +5,9 @@ module.exports = function(app) {
             changeOrigin: true
         }
         ));
+    app.use(createProxyMiddleware('/solvescape',
+        { target: 'http://localhost:8081',
+            changeOrigin: true
+        }
+        ));
 }

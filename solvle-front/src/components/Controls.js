@@ -153,6 +153,7 @@ function Controls() {
         " already eliminated many letters from consideration.";
     const rutBreakingThresholdHelpText = "Specifies the minimum number of words with 3 or more of the same shared letters to be considered a rut."
     const rutBreakMultiplierHelpText = "Adds a bonus to calculation bias for letters that can help resolve words in ruts. This can cause Solvle to adjust its fishing word recommendations."
+    const anagramModeHelpText = "Switch to anagram mode. Solvle will now suggest all words that can be made with any of the letters you've entered."
 
     const lowestAverageHelpText = "Produces the best average score (about 3.45745) and never fails a puzzle.";
     const lowestMaxHelpText = "Finishes all puzzles in 5 or fewer guesses, but worse average performance (about 3.54816).";
@@ -176,6 +177,7 @@ function Controls() {
             <div>
                 <div> Word Length: {boardState.settings.wordLength} </div>
                 <div> Number of Guesses: {boardState.settings.attempts} </div>
+                <div> Mode: {boardState.settings.anagram ? "Anagram" : "Solvle"}</div>
             </div>
             <hr/>
             <div onChange={toggleResetWords} className="wordLists">
@@ -216,6 +218,10 @@ function Controls() {
                 <div title={useRutBreakingHelpText}>
                     <MDBSwitch id='useRutBreakingSwitch' label="Enable Rut Identification" name="useRutBreaking"
                                defaultChecked={boardState.settings.useRutBreaking} onChange={updateSetting}/>
+                </div>
+                <div title={anagramModeHelpText}>
+                    <MDBSwitch id='anagramModeSwitch' label="Anagram Mode" name="anagramMode"
+                               defaultChecked={boardState.settings.anagramMode} onChange={updateSetting}/>
                 </div>
             </div>
             <div hidden={!boardState.settings.useBias}>
