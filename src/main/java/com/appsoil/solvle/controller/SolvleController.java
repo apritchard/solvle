@@ -7,11 +7,14 @@ import com.appsoil.solvle.service.WordCalculationConfig;
 import com.appsoil.solvle.service.solvers.RemainingSolver;
 import com.appsoil.solvle.service.solvers.Solver;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -22,14 +25,16 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 public class SolvleController {
 
     private final SolvleService solvleService;
+    private final CacheManager cacheManager;
 
     private static long requestsSinceLoading;
     private static final LocalDateTime startTime = LocalDateTime.now();
     private static LocalDateTime lastRequestLogTime = LocalDateTime.now();
     private static int MAX_PARTITION = 200;
 
-    public SolvleController(SolvleService solvleService) {
+    public SolvleController(SolvleService solvleService, CacheManager cacheManager) {
         this.solvleService = solvleService;
+        this.cacheManager = cacheManager;
     }
 
     @GetMapping("/{wordRestrictions}")
@@ -57,6 +62,8 @@ public class SolvleController {
                         .withHardMode(hardMode)
                         .withRutBreak(rutBreakMultiplier, rutBreakThreshold);
         log.info("Valid words requested with configuration {}", wordCalculationConfig);
+        checkMemory();
+        log.info(cacheManager.getCacheNames());
         SolvleDTO result = solvleService.getWordAnalysis(wordRestrictions.toLowerCase(), wordLength, wordList, wordCalculationConfig);
         log.info("Valid words for {} took {}", wordRestrictions, Duration.between(start, LocalDateTime.now()));
         return SolvleDTO.appendRestrictionString(wordRestrictions, result);
@@ -158,6 +165,22 @@ public class SolvleController {
             double requestPerHour = (double) requestsSinceLoading * 60 / (double) MINUTES.between(startTime, now);
             log.info("{} requests made since {} ({} per hour)", requestsSinceLoading, startTime, requestPerHour);
             lastRequestLogTime = now;
+        }
+    }
+
+    private void checkMemory() {
+        long maxMem = Runtime.getRuntime().maxMemory();
+        long totalMem = Runtime.getRuntime().totalMemory();
+        long freeMem = Runtime.getRuntime().freeMemory();
+
+        Cache validWords = cacheManager.getCache("validWords");
+        int validWordsSize = ((Map)validWords.getNativeCache()).size();
+
+        log.info("max({}) total({}) free({}) cachedWords({})", maxMem, totalMem, freeMem, validWordsSize);
+
+        if(validWordsSize > 50000) {
+            log.warn("clearing solvle cache");
+            cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
         }
     }
 

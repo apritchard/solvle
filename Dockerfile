@@ -10,4 +10,4 @@ RUN mvn -f /home/app/pom.xml clean package
 FROM openjdk:18-alpine
 COPY --from=build /home/app/target/*.jar /usr/local/lib/app.jar
 EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "/usr/local/lib/app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=80.0", "-jar", "/usr/local/lib/app.jar"]
