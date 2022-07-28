@@ -38,7 +38,7 @@ function SolveModal(props) {
         e.preventDefault();
         let configParams = generateConfigParams(boardState);
 
-        fetch('/solvle/solve/' + solution + "?firstWord=" + firstWord + configParams)
+        fetch('/solvle/solve/' + solution.trim() + "?firstWord=" + firstWord + configParams)
             .then(res => res.json())
             .then((data) => {
                 console.log("Received guesses:");

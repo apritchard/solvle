@@ -137,7 +137,6 @@ public class FullDictionaryTest {
                 .withRutBreak(1.0, 6);
         var outcome = solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "simple");
         addStats(config, outcome);
-//        printResults(outcome);
     }
 
     @ParameterizedTest
@@ -201,7 +200,7 @@ public class FullDictionaryTest {
 
     @Test
     public void compareStandardConfigs() {
-        String firstWord = "relay";
+        String firstWord = "";
         WordCalculationConfig.DEFAULT_CONFIGS.forEach((name, config) -> {
             log.info("Running " + name);
             addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "simple"));
