@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class SolvleService {
 
     private final Dictionary simpleDictionary;
+    private final Dictionary reducedDictionary;
     private final Dictionary bigDictionary;
     private final Dictionary hugeDictionary;
 
@@ -31,11 +32,13 @@ public class SolvleService {
     private final int SHARED_POSITION_LIMIT = 1000;
 
     public SolvleService(@Qualifier("simpleDictionary") Dictionary simpleDictionary,
+                         @Qualifier("reducedDictionary") Dictionary reducedDictionary,
                          @Qualifier("bigDictionary") Dictionary bigDictionary,
                          @Qualifier("hugeDictionary") Dictionary hugeDictionary) {
         this.simpleDictionary = simpleDictionary;
         this.bigDictionary = bigDictionary;
         this.hugeDictionary = hugeDictionary;
+        this.reducedDictionary = reducedDictionary;
     }
 
     @Cacheable("validWords")
@@ -220,6 +223,7 @@ public class SolvleService {
 
     private Set<Word> getPrimarySet(String wordList, int length) {
         Dictionary dictionary = switch (wordList) {
+            case "reduced" -> length == 5 ? reducedDictionary : bigDictionary;
             case "simple" -> length == 5 ? simpleDictionary : bigDictionary;
             case "huge" -> hugeDictionary;
             default -> bigDictionary;

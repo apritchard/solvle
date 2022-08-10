@@ -188,6 +188,12 @@ function Controls() {
                            name="dict"/>
                     <label htmlFor="simpleRadio">Simple</label>
                 </span>
+                <span
+                    title="1906 words: Same as simple, but has had solutions used before Aug 9, 2022 removed">
+                    <input id="reducedRadio" defaultChecked={dictionary === "reduced"} type="radio" value="reduced"
+                           name="dict"/>
+                    <label htmlFor="reducedRadio">Reduced</label>
+                </span>
                 <span title="172820 words: https://github.com/dolph/dictionary/blob/master/enable1.txt">
                     <input id="bigRadio" defaultChecked={dictionary === "big"} type="radio" value="big" name="dict"/>
                     <label htmlFor="bigRadio">Scrabble</label>
