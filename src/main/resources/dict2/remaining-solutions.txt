@@ -1128,7 +1128,6 @@ pasty
 patch
 patio
 patsy
-patty
 payee
 payer
 peace
