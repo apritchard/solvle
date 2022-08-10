@@ -37,7 +37,6 @@ alarm
 alert
 algae
 alibi
-alien
 align
 alike
 alive
@@ -231,7 +230,6 @@ brush
 brute
 buddy
 budge
-buggy
 bugle
 build
 built
@@ -363,7 +361,6 @@ cover
 covet
 covey
 cower
-coyly
 crack
 craft
 crane
@@ -1295,7 +1292,6 @@ retry
 reuse
 revel
 revue
-rhyme
 rider
 ridge
 rifle
@@ -1478,7 +1474,6 @@ slyly
 smack
 small
 smash
-smear
 smell
 smile
 smirk
@@ -1770,7 +1765,6 @@ uncut
 under
 undid
 undue
-unfit
 union
 unite
 unity
@@ -1900,6 +1894,5 @@ wryly
 yacht
 yeast
 young
-youth
 zebra
 zonal
