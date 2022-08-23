@@ -109,13 +109,13 @@ function Controls() {
     const setPreset = (e) => {
         switch(e.target.name) {
             case "OPTIMAL_MEAN":
-                return setConfig(3, 8, .007, 110, 1, 0, 0, 0.6);
+                return setConfig(3, 8, .007, 110, 1, 0, 0, 0.7);
             case "LOWEST_MAX":
-                return setConfig(5, 5, .01, 100, 1, 0, 0, 0.6);
+                return setConfig(5, 5, .01, 100, 1, 0, 0, 0.7);
             case "THREE_OR_LESS":
                 return setConfig(4, 8, .001, 50, 0.6, 0, 1, 0.9);
             case "FOUR_OR_LESS":
-                return setConfig(3, 9, .007, 100, 0.6, 1, 0, 0.6);
+                return setConfig(3, 9, .007, 100, 0.6, 1, 0, 0.7);
             case "TWO_OR_LESS":
                 return setConfig(3, 4, .4, 50, 0, 0, 0, 0.9);
             default:

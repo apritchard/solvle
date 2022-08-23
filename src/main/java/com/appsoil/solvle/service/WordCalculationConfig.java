@@ -95,7 +95,7 @@ public record  WordCalculationConfig (
      * @return
      */
     public static WordCalculationConfig OPTIMAL_MEAN =  new WordCalculationConfig(3, 8, 110, .007)
-            .withFineTuning(1, 0, 0.0, 0.6);
+            .withFineTuning(1, 0, 0.0, 0.7);
 
     /**
      * Returns a config guaranteed to solve any wordle in 5 or fewer guesses, at the cost of higher mean
@@ -106,7 +106,7 @@ public record  WordCalculationConfig (
      * @return
      */
     public static WordCalculationConfig LOWEST_MAX = new WordCalculationConfig(5, 5, 100, 0.007)
-            .withFineTuning(1, 0, 0, 0.6);
+            .withFineTuning(1, 0, 0, 0.7);
 
     /**
      * Maximize the number of scores 3 and below
@@ -129,7 +129,7 @@ public record  WordCalculationConfig (
      * @return
      */
     public static WordCalculationConfig FOUR_OR_LESS = new WordCalculationConfig(3, 9, 100, .007)
-            .withFineTuning(0.6, 1, 0.0, 0.6);
+            .withFineTuning(0.6, 1, 0.0, 0.7);
 
     /**
      * Maximize the number of scores 2 at all cost
