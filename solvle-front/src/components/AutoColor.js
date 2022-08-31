@@ -28,8 +28,8 @@ function AutoColor(props) {
         if(e != undefined) {
             e.preventDefault();
         }
-        if(solution.length == boardState.settings.wordLength || solution.length == 0) {
-            setAutoColorSolution(solution);
+        if(solution.trim().length == boardState.settings.wordLength || solution.length == 0) {
+            setAutoColorSolution(solution.trim());
         } else {
             setValid(false);
         }

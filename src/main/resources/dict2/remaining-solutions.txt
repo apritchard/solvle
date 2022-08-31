@@ -294,7 +294,6 @@ cheer
 chess
 chick
 chide
-chief
 child
 chili
 chime
@@ -327,7 +326,6 @@ cleft
 clerk
 cliff
 climb
-cling
 clink
 cloak
 clone
@@ -335,7 +333,6 @@ close
 cloud
 clout
 clove
-clown
 clued
 clump
 clung
@@ -670,7 +667,6 @@ gamut
 gassy
 gauge
 gaunt
-gauze
 gavel
 gayer
 gayly
@@ -692,7 +688,6 @@ gland
 glare
 glaze
 gleam
-glean
 glide
 glint
 globe
@@ -737,7 +732,6 @@ gross
 grout
 grove
 grown
-gruel
 gruff
 grunt
 guard
@@ -805,7 +799,6 @@ human
 humid
 humus
 hunch
-hunky
 hurry
 husky
 hussy
@@ -839,7 +832,6 @@ inter
 intro
 ionic
 irate
-irony
 issue
 itchy
 jazzy
@@ -863,7 +855,6 @@ junto
 juror
 kappa
 kayak
-khaki
 kinky
 kiosk
 kitty
@@ -878,7 +869,6 @@ knock
 known
 koala
 krill
-label
 laden
 ladle
 lager
@@ -991,7 +981,6 @@ melee
 melon
 mercy
 merge
-merit
 merry
 meter
 metro
@@ -1043,7 +1032,6 @@ naive
 nanny
 nasal
 navel
-needy
 neigh
 nerdy
 nerve
@@ -1085,7 +1073,6 @@ older
 ombre
 omega
 onion
-onset
 opera
 opine
 opium
@@ -1171,7 +1158,6 @@ plunk
 plush
 poesy
 poise
-poker
 polar
 polka
 polyp
@@ -1317,7 +1303,6 @@ rover
 rowdy
 rower
 ruddy
-ruder
 rugby
 ruler
 rumba
@@ -1418,7 +1403,6 @@ short
 shout
 shove
 shrew
-shrug
 shuck
 shunt
 shush
@@ -1718,7 +1702,6 @@ trade
 trail
 tramp
 tread
-treat
 trend
 trial
 tribe
@@ -1744,10 +1727,8 @@ tumor
 tunic
 turbo
 tutor
-twang
 tweak
 tweet
-twice
 twine
 twirl
 twist
@@ -1821,7 +1802,6 @@ waist
 waive
 waltz
 warty
-waste
 water
 waver
 waxen
@@ -1874,7 +1854,6 @@ worst
 worth
 would
 wound
-woven
 wrack
 wrath
 wreak
