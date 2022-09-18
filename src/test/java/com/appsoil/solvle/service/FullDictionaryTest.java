@@ -37,12 +37,12 @@ public class FullDictionaryTest {
     record TestReport(DescriptiveStatistics stats, String firstWord, List<List<String>> problems) {}
 
     @BeforeAll
-    static private void init() {
+    static void init() {
          testReports = new HashMap<>();
     }
 
     @AfterAll
-    static private void report() {
+    static void report() {
         log.warn("Begin report full report:");
         testReports.forEach(FullDictionaryTest::logReport);
     }
