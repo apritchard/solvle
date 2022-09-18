@@ -215,13 +215,9 @@ public class WordCalculationService {
                 Map<Character, LongAdder> reducedMap = new ConcurrentHashMap<>();
                 var entry = v.entrySet().stream()
                         .sorted(Comparator.comparingInt(es -> es.getValue().intValue()))
-                        .findFirst();
-                if(entry.isEmpty()) {
-                    newMap.put(pos, v);
-                } else {
-                    reducedMap.put(entry.get().getKey(), entry.get().getValue());
-                    newMap.put(pos, reducedMap);
-                }
+                        .findFirst().get();
+                reducedMap.put(entry.getKey(), entry.getValue());
+                newMap.put(pos, reducedMap);
             } else {
                 newMap.put(pos, v);
             }
