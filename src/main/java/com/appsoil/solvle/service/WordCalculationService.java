@@ -249,11 +249,20 @@ public class WordCalculationService {
         if(containedWords.size() < 1 || maxScore < 1) {
             return 0.0;
         }
+
+        double numKnownLetters = wordRestrictions.letterPositions().keySet().size();
+        double wordLength = wordRestrictions.word().getLength();
+
+
         //scale location bonus based on number of positions known
-        double locationAdjustment = 1 - (((double)wordRestrictions.letterPositions().keySet().size() / word.getLength()) * locationAdjustmentScale);
+        double locationAdjustment = 1 - ((numKnownLetters / word.getLength()) * locationAdjustmentScale);
 
         //scale unique bonus based on number of letters remaining
-        double uniqueAdjustment = 1 - ((1 - ((double)wordRestrictions.word().getLength() / WordRestrictions.NO_RESTRICTIONS.word().getLength())) * uniqueAdjustmentScale);
+        double uniqueAdjustment = 1 - ((1 - (wordLength / WordRestrictions.NO_RESTRICTIONS.word().getLength())) * uniqueAdjustmentScale);
+
+        //scale viable word preference based on number of positions known
+        double viableWordAdjustment = (viableWordPreference - ((numKnownLetters * viableWordAdjustmentScale)/wordLength));
+
         double totalScore = 0.0;
 
         // for each position in this word (i), check to see how many points it scores based on letters in each position across all words (j)
@@ -265,13 +274,14 @@ public class WordCalculationService {
                 double uniqueBonus = (word.letters().get(c) < 2) && !wordRestrictions.requiredLetters().contains(c) ? 1 + (uniquenessMultiplier-1)*uniqueAdjustment : 1;
                 double rutBreakerBonus = positionBonus.containsKey(c) ? positionBonus.get(c).doubleValue() : 0.0;
                 double numerator = wordsWithCharacter.get(j+1).containsKey(c) ? harmonic(wordsWithCharacter.get(j+1).get(c).intValue()) + rutBreakerBonus: 0;
-                 totalScore += ((numerator * locationBonus * uniqueBonus * vowelPenalty))
+
+                totalScore += ((numerator * locationBonus * uniqueBonus * vowelPenalty))
                          / (containedWords.size() * maxScore * rightLocationMultiplier); //divide by max score * bonuses to normalize scores closer to 100%
             }
         }
 
         if(totalScore > 0 && containedWords.contains(word)) {
-            totalScore += (viableWordPreference / (1 + (wordRestrictions.letterPositions().keySet().size() * viableWordAdjustmentScale))); //tiebreaker toward potential solutions
+            totalScore += viableWordAdjustment ; //tiebreaker toward potential solutions
         }
 
         return totalScore;

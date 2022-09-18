@@ -69,7 +69,7 @@ public class FullDictionaryTest {
     static private void logReport(WordCalculationConfig config, TestReport report) {
         //format data to copy into an annoying spreadsheet
         var countMap = Arrays.stream(report.stats().getSortedValues()).mapToInt(num -> (int) num).boxed().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        log.warn("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t\t\t\t\t\t{}\t{}\t{}\t{}",
+        log.warn("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t\t\t\t\t\t{}\t{}\t{}\t{}\t{}",
                 report.stats().getMean(),
                 report.stats().getMin(),
                 report.stats().getMax(),
@@ -93,7 +93,8 @@ public class FullDictionaryTest {
                 config.locationAdjustmentScale(),
                 config.uniqueAdjustmentScale(),
                 config.rutBreakThreshold(),
-                config.rutBreakMultiplier()
+                config.rutBreakMultiplier(),
+                report.firstWord()
         );
     }
 
@@ -125,7 +126,15 @@ public class FullDictionaryTest {
 
     @ParameterizedTest
     @CsvSource({
-            "2, 3, 6, 50, .007, 1, 0,  0,  1",
+            "3, 4, 3, 0, .25, 1, 0, 0, 0.9",
+            "3, 8, 3, 0, .25, 1, 0, 1, 0.9",
+            "3, 3, 8, 0, .1, 1, 0, 0, 0.7",
+            "3, 4, 3, 0, 1, 1, 0, 0, 0.9",
+            "3, 8, 3, 0, 1, 1, 0, 1, 0.9",
+            "3, 3, 8, 0, 1, 1, 0, 0.5, 0.7",
+            "3, 4, 3, 30, .25, 1, 0, 0, 0.9",
+            "3, 8, 3, 30, .25, 1, 0, 1, 0.9",
+            "3, 3, 8, 30, .1, 1, 0, 0, 0.7",
 
     })
     public void dictionaryRemainingPermutationSolver( int fishingThreshold, double rightLocationMultiplier, double uniquenessMultiplier, int permutationThreshold,double viableWordPreference,
@@ -133,8 +142,8 @@ public class FullDictionaryTest {
         log.info("Starting permutation solver {}, {}", fishingThreshold, permutationThreshold);
         String firstWord = "";
         WordCalculationConfig config = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, permutationThreshold, viableWordPreference).withFishingThreshold(fishingThreshold)
-                .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier)
-                .withRutBreak(1.0, 6);
+                .withFineTuning(locationAdjustmentScale, uniqueAdjustmentScale, viableWordAdjustmentScale, vowelMultiplier);
+//                .withRutBreak(1.0, 6);
         var outcome = solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "simple");
         addStats(config, outcome);
     }
@@ -145,7 +154,7 @@ public class FullDictionaryTest {
     })
     public void dictionaryRemainingPermutationSolverWithRestrictions( int fishingThreshold, double rightLocationMultiplier, double uniquenessMultiplier, int permutationThreshold, boolean useHarmonic, double viableWordPreference) {
         log.info("Starting permutation solver {}, {}", fishingThreshold, permutationThreshold);
-        String firstWord = "slate";
+        String firstWord = "";
         String startingRestrictions = "BCDFGHIJKMNOPQRUVWXYZ";
         WordCalculationConfig config = new WordCalculationConfig(rightLocationMultiplier, uniquenessMultiplier, permutationThreshold, viableWordPreference).withFishingThreshold(fishingThreshold);
         addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), List.of(firstWord), config, startingRestrictions, "simple"));
@@ -161,14 +170,14 @@ public class FullDictionaryTest {
 
     private static Stream<Arguments> dictionaryPermutationParameters() {
         List<Arguments> args = new ArrayList<>();
-        List<Integer> locationMults = List.of(3,4,5,6,7,8,9,10);
-        List<Integer> uniqueMults = List.of(1,2,3,4,5,6,7,8,9);
-        List<Double> viableWordPrefs = List.of(.007, .1, .25, .5);
-        List<Double> vowelMults = List.of(0.9);
-        List<Integer> partThreshs = List.of(10);
-        List<Double> locAdjusts = List.of(1.0, 0.6, 0.0);
+        List<Integer> locationMults = List.of(3,4,5,6,7,8,9);
+        List<Integer> uniqueMults = List.of(3,4,5,6,7,8,9);
+        List<Double> viableWordPrefs = List.of(2.0);
+        List<Double> vowelMults = List.of(1.0);
+        List<Integer> partThreshs = List.of(0);
+        List<Double> locAdjusts = List.of(0.0);
         List<Double> uniqAdjusts = List.of(0.0);
-        List<Double> vwAdjusts = List.of(0.0, 1.0);
+        List<Double> vwAdjusts = List.of(0.0, 1.0, -1.0);
 
         double timePerCase = 9.0;
         double tests = locationMults.size() * uniqueMults.size() * viableWordPrefs.size() * vowelMults.size() * partThreshs.size() * locAdjusts.size() * uniqAdjusts.size() * vwAdjusts.size();

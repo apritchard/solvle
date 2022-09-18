@@ -46,7 +46,6 @@ alloy
 along
 aloof
 aloud
-alpha
 alter
 amass
 amaze
@@ -188,7 +187,6 @@ bongo
 bonus
 booth
 booty
-booze
 borax
 borne
 bosom
@@ -284,7 +282,6 @@ chair
 chalk
 chaos
 chard
-charm
 chart
 chase
 chasm
@@ -307,7 +304,6 @@ chose
 chuck
 chump
 churn
-chute
 cider
 circa
 civil
@@ -318,7 +314,6 @@ clang
 clank
 clash
 clasp
-class
 clean
 clear
 cleat
@@ -456,7 +451,6 @@ doing
 dolly
 donut
 dopey
-doubt
 dough
 dowdy
 dowel
@@ -654,7 +648,6 @@ fruit
 fudge
 fugue
 fully
-fungi
 funky
 funny
 furor
@@ -743,7 +736,6 @@ guile
 guilt
 guise
 gulch
-gully
 gumbo
 gummy
 guppy
@@ -828,7 +820,6 @@ ingot
 inlay
 inlet
 inner
-inter
 intro
 ionic
 irate
@@ -894,7 +885,6 @@ least
 leave
 ledge
 leech
-leery
 lefty
 legal
 leggy
@@ -920,7 +910,6 @@ lobby
 local
 locus
 lodge
-lofty
 logic
 login
 loose
@@ -1099,7 +1088,6 @@ paler
 palsy
 pansy
 papal
-parer
 parka
 parse
 party
@@ -1179,7 +1167,6 @@ prime
 prior
 prism
 privy
-prize
 probe
 prone
 prong
@@ -1633,7 +1620,6 @@ tarot
 taste
 tasty
 tatty
-taunt
 tawny
 teach
 teary
@@ -1651,7 +1637,6 @@ terse
 testy
 thank
 theft
-theme
 there
 these
 theta
@@ -1668,8 +1653,6 @@ throb
 throw
 thrum
 thump
-thyme
-tibia
 tidal
 tight
 timer
@@ -1825,7 +1808,6 @@ whirl
 whisk
 white
 whole
-whoop
 whose
 widen
 wider
