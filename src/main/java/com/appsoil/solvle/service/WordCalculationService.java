@@ -205,10 +205,25 @@ public class WordCalculationService {
     public Map<Integer, Map<Character, LongAdder>> removeRequiredLettersFromCountsByPosition(Map<Integer, Map<Character, LongAdder>> characterCounts, WordRestrictions wordRestrictions) {
         Map<Integer, Map<Character, LongAdder>> newMap = new ConcurrentHashMap<>();
         characterCounts.forEach((pos, v) -> {
-            if(!wordRestrictions.letterPositions().containsKey(pos) || !v.containsKey(wordRestrictions.letterPositions().get(pos))) {
-                newMap.put(pos, v);
-            } else {
+            if((wordRestrictions.letterPositions().containsKey(pos)
+                    && v.containsKey(wordRestrictions.letterPositions().get(pos)))
+                    || v.size() == 1) //if there's only 1 option for this position, it is implicitly "known"
+            {
                 newMap.put(pos, new ConcurrentHashMap<>());
+            } else if (v.size() == 2) {
+                //if there are 2 options for this position, just pick the least common and infer the other
+                Map<Character, LongAdder> reducedMap = new ConcurrentHashMap<>();
+                var entry = v.entrySet().stream()
+                        .sorted(Comparator.comparingInt(es -> es.getValue().intValue()))
+                        .findFirst();
+                if(entry.isEmpty()) {
+                    newMap.put(pos, v);
+                } else {
+                    reducedMap.put(entry.get().getKey(), entry.get().getValue());
+                    newMap.put(pos, reducedMap);
+                }
+            } else {
+                newMap.put(pos, v);
             }
         });
         return newMap;
