@@ -70,7 +70,7 @@ function App() {
     const [boardState, setBoardState] = useState(initialBoardState(6, 5));
 
     const initialAvailableLetters = () => {
-        return new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
+        return new Set("AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ".split(""));
     }
 
     const initialKnownLetters = (width) => {

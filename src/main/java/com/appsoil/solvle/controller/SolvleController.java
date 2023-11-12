@@ -30,7 +30,7 @@ public class SolvleController {
     private static long requestsSinceLoading;
     private static final LocalDateTime startTime = LocalDateTime.now();
     private static LocalDateTime lastRequestLogTime = LocalDateTime.now();
-    private static int MAX_PARTITION = 200;
+    private static int MAX_PARTITION = 3000;
 
     public SolvleController(SolvleService solvleService, CacheManager cacheManager) {
         this.solvleService = solvleService;

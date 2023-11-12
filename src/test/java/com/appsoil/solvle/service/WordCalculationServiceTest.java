@@ -1,5 +1,6 @@
 package com.appsoil.solvle.service;
 
+import com.appsoil.solvle.data.Dictionary;
 import com.appsoil.solvle.data.Word;
 import com.appsoil.solvle.data.WordFrequencyScore;
 import com.appsoil.solvle.data.WordRestrictions;
@@ -71,7 +72,10 @@ public class WordCalculationServiceTest {
 
     @Test
     void calculateFishingWordsByPosition_priotizesNewLettersFollowedByPossibleSolutions() {
-        Set<Word> allWords = Arrays.stream("AA, AB, AC, AD, BA, BB, BC, BD, CA, CB, CC, CD, DA, DB, DC, DD".split(", ")).map(Word::new).collect(Collectors.toSet());
+
+        Set<Word> words = Arrays.stream("AA, AB, AC, AD, BA, BB, BC, BD, CA, CB, CC, CD, DA, DB, DC, DD".split(", ")).map((String word) -> new Word(word)).collect(Collectors.toSet());
+        Set<Word> allWords = getFormattedWords(words);
+
         Set<Word> viableWords = Stream.of("AA", "AC", "AD").map(Word::new).collect(Collectors.toSet());
         WordRestrictions restrictions = new WordRestrictions("A1B!2CD");
         //
@@ -88,9 +92,9 @@ public class WordCalculationServiceTest {
         Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions, new HashMap<>());
 
         Set<String> expected = Set.of("CD", "DC");
-
-//        Assertions.assertTrue(scores.stream().limit(2).map(WordFrequencyScore::word).collect(Collectors.toSet()).containsAll(expected), "Top solutions did not match expected");
         System.out.println(scores.toString());
+
+        Assertions.assertTrue(scores.stream().limit(2).map(WordFrequencyScore::word).collect(Collectors.toSet()).containsAll(expected), "Top solutions did not match expected");
     }
 
     @Test
@@ -115,6 +119,13 @@ public class WordCalculationServiceTest {
         Set<WordFrequencyScore> scores = wordCalculationService.calculateFishingWordsByPosition(allWords, characterCounts, viableWords, 25, restrictions, new HashMap<>());
 
         System.out.println(scores.toString());
+    }
+
+    private static Set<Word> getFormattedWords(Set<Word> words) {
+        int size = words.stream().findFirst().get().getLength();
+        var wordMap = Map.of(size, words);
+        var d = new Dictionary(wordMap);
+        return d.wordsBySize().get(size);
     }
 
 }

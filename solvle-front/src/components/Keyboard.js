@@ -6,6 +6,7 @@ function Keyboard() {
     const keys1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
     const keys2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
     const keys3 = ["Z", "X", "C", "V", "B", "N", "M"];
+    const keys4 = ["Á", "Ð", "É", "Í", "Ó", "Ú", "Ý", "Þ", "Æ", "Ö" ]
 
     const {
         availableLetters,
@@ -40,6 +41,11 @@ function Keyboard() {
                         onSelectLetter(key);
                     }
                 });
+                keys4.forEach((key) => {
+                    if (event.key.toLowerCase() === key.toLowerCase()) {
+                        onSelectLetter(key);
+                    }
+                })
             }
         },
         [onDelete, onEnter, onSelectLetter]
@@ -54,6 +60,11 @@ function Keyboard() {
 
     return (
         <div className="keyboard" onKeyDown={handleKeyboard}>
+            <div className="keyboardLine">
+                {keys4.map((key) => {
+                    return <Key key={key} keyVal={key} disabled={!availableLetters.has(key)}/>;
+                })}
+            </div>
             <div className="keyboardLine">
                 {keys1.map((key) => {
                     return <Key key={key} keyVal={key} disabled={!availableLetters.has(key)}/>;

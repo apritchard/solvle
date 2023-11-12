@@ -107,8 +107,10 @@ public class FullDictionaryTest {
     @Test
     public void testConfig() {
         String firstWord = "";
-        WordCalculationConfig config = WordCalculationConfig.FOUR_OR_LESS;
-        addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "simple"));
+        WordCalculationConfig config = WordCalculationConfig.OPTIMAL_MEAN;
+        addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "big", 3));
+        addStats(config, solvleService.solveDictionary(new RemainingSolver(solvleService, config), firstWord, config, "big", 4));
+
     }
 
     @ParameterizedTest

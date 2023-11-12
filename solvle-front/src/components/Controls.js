@@ -202,6 +202,10 @@ function Controls() {
                     <input id="hugeRadio" defaultChecked={dictionary === "huge"} type="radio" value="huge" name="dict"/>
                     <label htmlFor="hugeRadio">Huge</label>
                 </span>
+                <span title="Icelandic Dictionary: https://github.com/titoBouzout/Dictionaries/blob/master/Icelandic.dic">
+                    <input id="icelandRadio" defaultChecked={dictionary === "iceland"} type="radio" value="iceland" name="dict" />
+                    <label htmlFor="icelandRadio">Íslensku</label>
+                </span>
             </div>
             <hr/>
             <div>
@@ -319,7 +323,7 @@ function Controls() {
                     value={boardState.settings.calculationConfig.partitionThreshold}
                     label='Partition Threshold: recommended [10-50]'
                     name='partitionThreshold'
-                    min='0' max='200' step='1'
+                    min='0' max='3000' step='1'
                     id='partitionThresholdRange'
                     onChange={updateConfig}
                 />

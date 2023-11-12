@@ -2,7 +2,7 @@
 export function generateRestrictionString(availableLetters, knownLetters, unsureLetters) {
     let restrictionString = "";
 
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").filter(letter => availableLetters.has(letter)).forEach(letter => {
+    "AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ".split("").filter(letter => availableLetters.has(letter)).forEach(letter => {
         restrictionString += letter;
         knownLetters.forEach((l, pos) => {
             if (l === letter) {

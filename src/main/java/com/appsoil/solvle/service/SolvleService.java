@@ -26,6 +26,7 @@ public class SolvleService {
     private final Dictionary reducedDictionary;
     private final Dictionary bigDictionary;
     private final Dictionary hugeDictionary;
+    private final Dictionary icelandDictionary;
 
     private final int MAX_RESULT_LIST_SIZE = 100;
     private final int FISHING_WORD_SIZE = 200;
@@ -34,11 +35,13 @@ public class SolvleService {
     public SolvleService(@Qualifier("simpleDictionary") Dictionary simpleDictionary,
                          @Qualifier("reducedDictionary") Dictionary reducedDictionary,
                          @Qualifier("bigDictionary") Dictionary bigDictionary,
-                         @Qualifier("hugeDictionary") Dictionary hugeDictionary) {
+                         @Qualifier("hugeDictionary") Dictionary hugeDictionary,
+                         @Qualifier("icelandicDictionary") Dictionary icelandDictionary) {
         this.simpleDictionary = simpleDictionary;
         this.bigDictionary = bigDictionary;
         this.hugeDictionary = hugeDictionary;
         this.reducedDictionary = reducedDictionary;
+        this.icelandDictionary = icelandDictionary;
     }
 
     @Cacheable("validWords")
@@ -226,6 +229,7 @@ public class SolvleService {
             case "reduced" -> length == 5 ? reducedDictionary : bigDictionary;
             case "simple" -> length == 5 ? simpleDictionary : bigDictionary;
             case "huge" -> hugeDictionary;
+            case "iceland" -> icelandDictionary;
             default -> bigDictionary;
         };
         return dictionary.wordsBySize().get(length);
@@ -236,6 +240,7 @@ public class SolvleService {
         Dictionary fishingWordDictionary = switch(wordList) {
             case "simple" -> /*length == 5 ? simpleGuessesDictionary :*/ bigDictionary;
             case "huge" -> hugeDictionary;
+            case "iceland" -> icelandDictionary;
             default -> bigDictionary;
         };
         return fishingWordDictionary.wordsBySize().get(length);
@@ -244,6 +249,10 @@ public class SolvleService {
     public SharedPositions findSharedWordRestrictions(String wordList, int length) {
         WordCalculationService wordCalculationService= new WordCalculationService(WordCalculationConfig.SIMPLE);
         return wordCalculationService.findSharedWordRestrictions(getPrimarySet(wordList, length));
+    }
+
+    public Map<String, List<String>> solveDictionary(Solver solver, String firstWord, WordCalculationConfig wordCalculationConfig, String wordList) {
+        return solveDictionary(solver, firstWord, wordCalculationConfig, wordList, 5);
     }
 
     /**
@@ -255,16 +264,17 @@ public class SolvleService {
      * @param wordCalculationConfig
      * @return
      */
-    public Map<String, List<String>> solveDictionary(Solver solver, String firstWord, WordCalculationConfig wordCalculationConfig, String wordList) {
+    public Map<String, List<String>> solveDictionary(Solver solver, String firstWord, WordCalculationConfig wordCalculationConfig, String wordList, int length) {
 
-        Set<Word> words = getPrimarySet(wordList, 5);
+        Set<Word> words = getPrimarySet(wordList, length);
 
         if(firstWord == null || firstWord.isBlank()) {
-            SolvleDTO guess = getWordAnalysis(WordRestrictions.noRestrictions(), words, getFishingSet(wordList, 5), wordCalculationConfig);
+            SolvleDTO guess = getWordAnalysis(WordRestrictions.noRestrictions(), words, getFishingSet(wordList, length), wordCalculationConfig);
             firstWord = guess.fishingWords().stream().findFirst().get().word();
         }
 
         final String startingWord = firstWord;
+        log.info("Solving {}-letter {}-word dictionary with starting word {}", length, words.size(), firstWord);
 
         Map<String, List<String>> outcome = new ConcurrentHashMap<>();
         words.stream().forEach( word -> {

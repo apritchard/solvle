@@ -35,6 +35,11 @@ public class SolvleConfig {
         return readResourceToDictionary("/dict2/simple-solutions.txt");
     }
 
+    @Bean(name = "icelandicDictionary")
+    Dictionary getIcelandicDictionr() {
+        return readResourceToDictionary("/dict2/iceland.txt");
+    }
+
     @Bean(name = "reducedDictionary")
     Dictionary getReducedDictionary() {
         return readResourceToDictionary("/dict2/remaining-solutions.txt");

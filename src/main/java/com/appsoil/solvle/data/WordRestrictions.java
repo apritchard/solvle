@@ -22,7 +22,7 @@ public record WordRestrictions(Word word,
 
     private static int MAX_WORD_LENGTH = 9;
 
-    public static final WordRestrictions NO_RESTRICTIONS = new WordRestrictions("abcdefghijklmnopqrstuvwxyz");
+    public static final WordRestrictions NO_RESTRICTIONS = new WordRestrictions("aábcdðeéfghiíjklmnoópqrstuúvwxyýzþæö");
 
     /**
      * Creates a description of known restriction knowledge based on provided input string.
@@ -38,7 +38,7 @@ public record WordRestrictions(Word word,
      *                  u3!4 - required in 3, not allowed in 4
      */
     public WordRestrictions(String word) {
-        this(new Word(word.replaceAll("[^A-Za-z]", ""), 0),
+        this(new Word(word.replaceAll("[^\\p{L}]", ""), 0),
                 new HashSet<>(MAX_WORD_LENGTH),
                 new HashMap<>(MAX_WORD_LENGTH),
                 new HashMap<>(MAX_WORD_LENGTH));

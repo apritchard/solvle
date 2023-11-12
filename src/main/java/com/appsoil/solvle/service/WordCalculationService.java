@@ -152,12 +152,13 @@ public class WordCalculationService {
 
     public Set<WordFrequencyScore> calculateViableWordsByPosition(Set<Word> words, Map<Integer, Map<Character, LongAdder>> characterCounts, Set<Word> containedWords,
                                                                   int requiredCharCount, int sizeLimit, WordRestrictions wordRestrictions, Map<Character, DoubleAdder> positionBonus) {
-        return words.parallelStream()
+        var result = words.parallelStream()
                 .map(word -> new WordFrequencyScore(word.getOrder(), word.word(),
                         calculateFreqScoreByPosition(word, characterCounts, containedWords, word.getLength() - requiredCharCount, wordRestrictions, positionBonus)))
                 .sorted()
                 .limit(sizeLimit)
                 .collect(Collectors.toCollection(() -> new TreeSet<>()));
+        return result;
     }
 
     /**
@@ -262,11 +263,11 @@ public class WordCalculationService {
         }
 
         double numKnownLetters = wordRestrictions.letterPositions().keySet().size();
-        double wordLength = wordRestrictions.word().getLength();
+        double wordLength = word.getLength();
 
 
         //scale location bonus based on number of positions known
-        double locationAdjustment = 1 - ((numKnownLetters / word.getLength()) * locationAdjustmentScale);
+        double locationAdjustment = 1 - ((numKnownLetters / wordLength) * locationAdjustmentScale);
 
         //scale unique bonus based on number of letters remaining
         double uniqueAdjustment = 1 - ((1 - (wordLength / WordRestrictions.NO_RESTRICTIONS.word().getLength())) * uniqueAdjustmentScale);
